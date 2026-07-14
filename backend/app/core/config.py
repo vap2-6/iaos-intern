@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     # Database
-    DATABASE_URL: str = "mysql+pymysql://iaos:iaos_password@localhost:3306/iaos"
+    DATABASE_URL: str = "mysql+pymysql://iaos:iaos123@localhost:3306/iaos"
 
     # Security
     SECRET_KEY: str = "insecure-dev-key-change-me"
