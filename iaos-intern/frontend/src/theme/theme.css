@@ -192,6 +192,10 @@ button {
   background: var(--navy-tint);
   color: var(--slate);
 }
+.badge-info {
+  background: var(--navy-tint);
+  color: var(--navy);
+}
 
 .alert {
   padding: 11px 14px;
