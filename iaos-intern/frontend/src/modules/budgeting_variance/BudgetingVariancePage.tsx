@@ -134,7 +134,108 @@ export default function BudgetingVariancePage() {
   const [tab, setTab] = useState<Tab>("Dashboard");
 
   return (
-    <div style={{ display: "grid", gap: 18 }}>
+    <div className="bv-container" style={{ display: "grid", gap: 18 }}>
+      <style>{`
+        .bv-container {
+          font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .bv-container .bv-header {
+          background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
+          border-radius: 14px;
+          padding: 24px;
+          color: #ffffff;
+          box-shadow: 0 10px 15px -3px rgba(15, 118, 110, 0.1), 0 4px 6px -2px rgba(15, 118, 110, 0.05);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          border-left: 6px solid #14b8a6;
+        }
+        .bv-container .bv-header h2 {
+          color: #ffffff !important;
+          margin: 0;
+          font-size: 24px;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+        }
+        .bv-container .bv-header p {
+          color: #ccfbf1 !important;
+          margin: 4px 0 0 0;
+          font-size: 14px;
+        }
+        .bv-container .card {
+          background: #ffffff !important;
+          border: 1px solid #e2dcd0;
+          border-left: 4px solid #0f766e !important;
+          border-radius: 14px !important;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02) !important;
+          padding: 20px !important;
+          transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+        }
+        .bv-container .card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 16px rgba(15, 118, 110, 0.06) !important;
+        }
+        .bv-container .btn-primary {
+          background: #0f766e !important;
+          border: 1px solid #0f766e !important;
+          color: #ffffff !important;
+          border-radius: 8px !important;
+          font-weight: 600 !important;
+          box-shadow: 0 4px 6px rgba(15, 118, 110, 0.2) !important;
+        }
+        .bv-container .btn-primary:hover {
+          background: #115e59 !important;
+          transform: translateY(-1px);
+        }
+        .bv-container .btn-ghost {
+          background: transparent !important;
+          border: 1px solid #e2e8f0 !important;
+          color: #0f766e !important;
+          border-radius: 8px !important;
+        }
+        .bv-container .btn-ghost:hover {
+          background: #f0fdf4 !important;
+          border-color: #ccfbf1 !important;
+          color: #0f766e !important;
+        }
+        .bv-container th {
+          background: #f0fdf4 !important;
+          color: #0f766e !important;
+          font-weight: 700 !important;
+          font-size: 12px !important;
+          border-bottom: 2px solid #ccfbf1 !important;
+          padding: 12px 16px !important;
+        }
+        .bv-container td {
+          padding: 12px 16px !important;
+          border-bottom: 1px solid #f0fdf4 !important;
+          color: #334155 !important;
+        }
+        .bv-container tbody tr:hover td {
+          background: #f9fdfd !important;
+        }
+        .bv-container .badge-slate {
+          background: #f0fdf4 !important;
+          color: #0f766e !important;
+          border: 1px solid #ccfbf1 !important;
+        }
+        .bv-container h3, .bv-container h4 {
+          color: #0f766e !important;
+          font-weight: 700 !important;
+        }
+      `}</style>
+
+      {/* Scoped Unique Finance Header */}
+      <div className="bv-header">
+        <div>
+          <h2>Budgeting & Variance Center</h2>
+          <p>Financial Integrity & Controls Monitoring Module</p>
+        </div>
+        <div style={{ background: "rgba(255,255,255,0.15)", padding: "10px 18px", borderRadius: "10px", fontSize: "14px", fontWeight: 600 }}>
+          📊 Active Session
+        </div>
+      </div>
+
       <div className="card" style={{ padding: 8, display: "flex", gap: 6, flexWrap: "wrap" }}>
         {TABS.map((t) => (
           <button
@@ -770,58 +871,144 @@ function ExceptionsTab() {
     refresh();
   }
 
+  function handleExport() {
+    if (rows.length === 0) {
+      alert("No data to export");
+      return;
+    }
+    const headers = "description,amount,disposition\n";
+    const csvContent = rows
+      .map((r) => `"${r.description.replace(/"/g, '""')}",${r.amount},"${r.disposition}"`)
+      .join("\n");
+    const blob = new Blob([headers + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "budgeting_exceptions.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      const text = evt.target?.result as string;
+      const lines = text.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+      if (lines.length < 2) {
+        alert("Invalid CSV format. Need header line + data lines.");
+        return;
+      }
+      
+      const headers = lines[0].split(",").map(h => h.replace(/^"|"$/g, "").trim().toLowerCase());
+      const descIdx = headers.indexOf("description");
+      const amtIdx = headers.indexOf("amount");
+      const dispIdx = headers.indexOf("disposition");
+
+      if (descIdx === -1) {
+        alert("CSV must include a 'description' column.");
+        return;
+      }
+
+      setLoading(true);
+      try {
+        for (let i = 1; i < lines.length; i++) {
+          const cols = lines[i].split(",").map(c => c.replace(/^"|"$/g, "").trim());
+          const descVal = cols[descIdx];
+          const amtVal = Number(cols[amtIdx] || 0);
+          const dispVal = dispIdx !== -1 ? cols[dispIdx] : "pending";
+
+          if (descVal) {
+            await post(`/api/modules/${SLUG}/exceptions`, {
+              description: descVal,
+              amount: amtVal,
+              disposition: dispVal,
+            });
+          }
+        }
+        alert("Successfully imported CSV data!");
+      } catch (err) {
+        console.error(err);
+        alert("Error during CSV import.");
+      }
+      refresh();
+    };
+    reader.readAsText(file);
+  }
+
   return (
     <div style={{ display: "grid", gap: 24, gridTemplateColumns: "1.6fr 1fr" }}>
-      <div className="card" style={{ overflow: "hidden", height: "fit-content" }}>
-        {loading ? (
-          <p style={{ padding: 18 }}>Loading…</p>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Description</th>
-                <th>Amount</th>
-                <th>Disposition</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r.id}>
-                  <td>{r.description}</td>
-                  <td>{r.amount}</td>
-                  <td>
-                    <select className="select" value={r.disposition} onChange={(e) => setDisposition(r, e.target.value)}>
-                      <option value="pending">Pending</option>
-                      <option value="valid">Valid</option>
-                      <option value="false_positive">False positive</option>
-                      <option value="waived">Waived</option>
-                    </select>
-                  </td>
-                  <td style={{ textAlign: "right" }}>
-                    <button
-                      className="btn btn-ghost"
-                      style={{ padding: "6px 12px" }}
-                      onClick={async () => {
-                        await del(`/api/modules/${SLUG}/exceptions/${r.id}`);
-                        refresh();
-                      }}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {rows.length === 0 && (
+      <div style={{ display: "grid", gap: 18, height: "fit-content" }}>
+        {/* CSV Import/Export Controls */}
+        <div className="card" style={{ padding: "12px 18px", display: "flex", gap: 12, alignItems: "center", justifyContent: "space-between" }}>
+          <div>
+            <h4 style={{ margin: 0, fontSize: 15 }}>CSV Data Actions</h4>
+            <p style={{ margin: "2px 0 0 0", fontSize: 13, color: "#64748b" }}>Bulk import/export exception items</p>
+          </div>
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            <label className="btn btn-ghost" style={{ padding: "6px 12px", cursor: "pointer", margin: 0, fontSize: 13 }}>
+              📥 Import CSV
+              <input type="file" accept=".csv" style={{ display: "none" }} onChange={handleImport} />
+            </label>
+            <button className="btn btn-ghost" style={{ padding: "6px 12px", fontSize: 13 }} onClick={handleExport}>
+              📤 Export CSV
+            </button>
+          </div>
+        </div>
+
+        <div className="card" style={{ overflow: "hidden" }}>
+          {loading ? (
+            <p style={{ padding: 18 }}>Loading…</p>
+          ) : (
+            <table>
+              <thead>
                 <tr>
-                  <td colSpan={4} style={{ color: "var(--slate)" }}>
-                    No exceptions yet.
-                  </td>
+                  <th>Description</th>
+                  <th>Amount</th>
+                  <th>Disposition</th>
+                  <th></th>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        )}
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.id}>
+                    <td>{r.description}</td>
+                    <td>{r.amount}</td>
+                    <td>
+                      <select className="select" value={r.disposition} onChange={(e) => setDisposition(r, e.target.value)}>
+                        <option value="pending">Pending</option>
+                        <option value="valid">Valid</option>
+                        <option value="false_positive">False positive</option>
+                        <option value="waived">Waived</option>
+                      </select>
+                    </td>
+                    <td style={{ textAlign: "right" }}>
+                      <button
+                        className="btn btn-ghost"
+                        style={{ padding: "6px 12px" }}
+                        onClick={async () => {
+                          await del(`/api/modules/${SLUG}/exceptions/${r.id}`);
+                          refresh();
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {rows.length === 0 && (
+                  <tr>
+                    <td colSpan={4} style={{ color: "var(--slate)" }}>
+                      No exceptions yet.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
       <form className="card" style={{ padding: 22, height: "fit-content" }} onSubmit={add}>
         <h3 style={{ color: "var(--navy)", marginBottom: 14 }}>Log an exception</h3>
