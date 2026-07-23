@@ -848,3 +848,124 @@
   font-weight: 600;
   font-size: 14px;
 }
+
+/* Working papers evidence custom styles */
+.wp-upload-toolbar {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.wp-task-select {
+  display: flex;
+  flex-direction: column;
+  max-width: 420px;
+  width: 100%;
+}
+
+.upload-box.drag-active {
+  background: rgba(0, 51, 102, 0.06);
+  border-color: #003366;
+  box-shadow: 0 0 12px rgba(0, 51, 102, 0.25);
+  transform: scale(1.005);
+}
+
+.upload-icon-active {
+  color: #003366 !important;
+  transform: scale(1.2);
+}
+
+.wp-search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.wp-search-icon {
+  position: absolute;
+  left: 10px;
+  color: var(--slate-soft);
+  pointer-events: none;
+}
+
+.search-input-indent {
+  padding-left: 32px !important;
+  width: 250px;
+}
+
+.btn-status-badge {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.btn-status-badge:hover .badge {
+  filter: brightness(0.92);
+  transform: translateY(-1px);
+}
+
+.text-danger {
+  color: #dc2626 !important;
+}
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+/* Inline form & modal card styles */
+.modal-form-box {
+  background: var(--canvas, #f8fafc);
+  border: 1px solid var(--line, #cbd5e1);
+  border-radius: var(--radius, 8px);
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.grid-form-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.grid-form-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.sync-banner-alert {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #047857;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm, 6px);
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+
+

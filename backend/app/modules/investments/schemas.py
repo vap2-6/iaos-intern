@@ -1,6 +1,5 @@
 from datetime import date, datetime
-from pydantic import BaseModel
-
+from pydantic import BaseModel, ConfigDict
 
 class InvestmentsExceptionOut(BaseModel):
     id: str
@@ -15,18 +14,15 @@ class InvestmentsExceptionOut(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    model_config = {"from_attributes": True}
-
+    model_config = ConfigDict(from_attributes=True)
 
 class ResolvePayload(BaseModel):
     id: str
-
 
 class SimulationPayload(BaseModel):
     procedure_id: str
     sample_size: int
     tolerance: float
-
 
 class SectorGuardrailOut(BaseModel):
     id: int
@@ -38,8 +34,7 @@ class SectorGuardrailOut(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    model_config = {"from_attributes": True}
-
+    model_config = ConfigDict(from_attributes=True)
 
 class ComplianceTrendPointOut(BaseModel):
     id: int
@@ -50,4 +45,4 @@ class ComplianceTrendPointOut(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(from_attributes=True)
