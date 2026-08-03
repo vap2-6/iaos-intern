@@ -217,3 +217,248 @@ class Remediation(Base, TenantMixin):
 
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+
+
+# ---------------------------------------------------------------------------
+# Valuation & Fair-Value Testing
+# ---------------------------------------------------------------------------
+
+class ValuationRecord(Base, TenantMixin):
+    __tablename__ = "mod_investments_valuation"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    holding: Mapped[str] = mapped_column(String(255), nullable=False)
+    cost_price: Mapped[str] = mapped_column(String(50), nullable=False)
+    independent_price: Mapped[str] = mapped_column(String(50), nullable=False)
+    erp_book_price: Mapped[str] = mapped_column(String(50), nullable=False)
+    variance_pct: Mapped[str] = mapped_column(String(50), nullable=False, default="0.00%")
+    ecl_triggered: Mapped[str] = mapped_column(String(255), nullable=False, default="No")
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="Passed")
+
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+
+
+# ---------------------------------------------------------------------------
+# Board Approval vs Limits
+# ---------------------------------------------------------------------------
+
+class BoardApprovalRecord(Base, TenantMixin):
+    __tablename__ = "mod_investments_board_approval"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    security: Mapped[str] = mapped_column(String(255), nullable=False)
+    investment_amount: Mapped[str] = mapped_column(String(100), nullable=False)
+    authorized_signatory: Mapped[str] = mapped_column(String(255), nullable=False)
+    resolution_ref: Mapped[str] = mapped_column(String(255), nullable=False, default="")
+    approval_status: Mapped[str] = mapped_column(String(100), nullable=False, default="Approved")
+    # Limit configuration (stored per tenant)
+    cfo_limit: Mapped[str] = mapped_column(String(100), nullable=False, default="$2,000,000")
+    committee_limit: Mapped[str] = mapped_column(String(100), nullable=False, default="$5,000,000")
+    board_limit: Mapped[str] = mapped_column(String(100), nullable=False, default="Unlimited")
+
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+
+
+# ---------------------------------------------------------------------------
+# Income Recomputation
+# ---------------------------------------------------------------------------
+
+class IncomeRecord(Base, TenantMixin):
+    __tablename__ = "mod_investments_income"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    holding_security: Mapped[str] = mapped_column(String(255), nullable=False)
+    coupon_rate: Mapped[str] = mapped_column(String(50), nullable=False)
+    daycount: Mapped[str] = mapped_column(String(50), nullable=False, default="30/360")
+    expected_coupon: Mapped[str] = mapped_column(String(100), nullable=False)
+    actual_received: Mapped[str] = mapped_column(String(100), nullable=False)
+    variance: Mapped[str] = mapped_column(String(100), nullable=False, default="$0")
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="Match")
+
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+
+
+# ---------------------------------------------------------------------------
+# Related-Party Investment Flag
+# ---------------------------------------------------------------------------
+
+class RelatedPartyRecord(Base, TenantMixin):
+    __tablename__ = "mod_investments_related_party"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    asset_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    relationship: Mapped[str] = mapped_column(String(255), nullable=False)
+    exposure_amount: Mapped[str] = mapped_column(String(100), nullable=False)
+    disclosure_status: Mapped[str] = mapped_column(String(255), nullable=False, default="Not Disclosed")
+    approval_status: Mapped[str] = mapped_column(String(100), nullable=False, default="No Approval Record")
+
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+
+
+# ---------------------------------------------------------------------------
+# Maturity & Rollover Tracking
+# ---------------------------------------------------------------------------
+
+class MaturityRecord(Base, TenantMixin):
+    __tablename__ = "mod_investments_maturity"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    security_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    maturity_date: Mapped[str] = mapped_column(String(100), nullable=False)
+    rollover_terms: Mapped[str] = mapped_column(String(255), nullable=False, default="N/A")
+    authorized_by: Mapped[str] = mapped_column(String(255), nullable=False, default="Treasury Desk")
+    action_required: Mapped[str] = mapped_column(String(100), nullable=False, default="Settle Cash")
+
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+
+
+# ---------------------------------------------------------------------------
+# Instrument Master Governance
+# ---------------------------------------------------------------------------
+
+class InstrumentRecord(Base, TenantMixin):
+    __tablename__ = "mod_investments_instrument_master"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    isin: Mapped[str] = mapped_column(String(50), nullable=False)
+    issuer: Mapped[str] = mapped_column(String(255), nullable=False)
+    asset_class: Mapped[str] = mapped_column(String(100), nullable=False)
+    credit_rating: Mapped[str] = mapped_column(String(100), nullable=False)
+    allowed_per_ips: Mapped[str] = mapped_column(String(50), nullable=False, default="Yes")
+
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+
+
+# ---------------------------------------------------------------------------
+# Realised Gain/Loss Testing
+# ---------------------------------------------------------------------------
+
+class RealisedGainRecord(Base, TenantMixin):
+    __tablename__ = "mod_investments_realised_gain"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    sold_security: Mapped[str] = mapped_column(String(255), nullable=False)
+    sale_date: Mapped[str] = mapped_column(String(50), nullable=False)
+    proceeds: Mapped[str] = mapped_column(String(100), nullable=False)
+    calculated_cost_fifo: Mapped[str] = mapped_column(String(100), nullable=False)
+    reported_gain_loss: Mapped[str] = mapped_column(String(100), nullable=False)
+    auditor_recomputed: Mapped[str] = mapped_column(String(100), nullable=False)
+    variance: Mapped[str] = mapped_column(String(100), nullable=False, default="$0")
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="Match")
+
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+
+
+# ---------------------------------------------------------------------------
+# Mandate & Policy Compliance
+# ---------------------------------------------------------------------------
+
+class MandateItem(Base, TenantMixin):
+    __tablename__ = "mod_investments_mandates"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="Compliant")  # Compliant | Breach
+
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+
+
+# ---------------------------------------------------------------------------
+# Accrued Income Ageing
+# ---------------------------------------------------------------------------
+
+class AccruedIncomeRecord(Base, TenantMixin):
+    __tablename__ = "mod_investments_accrued_income"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    security: Mapped[str] = mapped_column(String(255), nullable=False)
+    interest_accrued: Mapped[str] = mapped_column(String(100), nullable=False)
+    not_due: Mapped[str] = mapped_column(String(100), nullable=False, default="$0")
+    overdue_1_30: Mapped[str] = mapped_column(String(100), nullable=False, default="$0")
+    overdue_31_90: Mapped[str] = mapped_column(String(100), nullable=False, default="$0")
+    overdue_90_plus: Mapped[str] = mapped_column(String(100), nullable=False, default="$0")
+
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+
+
+# ---------------------------------------------------------------------------
+# Impairment Trigger Screening
+# ---------------------------------------------------------------------------
+
+class ImpairmentRecord(Base, TenantMixin):
+    __tablename__ = "mod_investments_impairment"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    security: Mapped[str] = mapped_column(String(255), nullable=False)
+    holding_value: Mapped[str] = mapped_column(String(100), nullable=False)
+    sp_rating: Mapped[str] = mapped_column(String(50), nullable=False)
+    ifrs9_stage: Mapped[str] = mapped_column(String(100), nullable=False, default="Stage 1")
+    impairment_triggered: Mapped[str] = mapped_column(String(10), nullable=False, default="No")
+    provision_amount: Mapped[str] = mapped_column(String(100), nullable=False, default="$0")
+
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+
+
+# ---------------------------------------------------------------------------
+# Pledged / Lien Investments
+# ---------------------------------------------------------------------------
+
+class PledgedAsset(Base, TenantMixin):
+    __tablename__ = "mod_investments_pledged_assets"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    pledged_asset: Mapped[str] = mapped_column(String(255), nullable=False)
+    pledged_value: Mapped[str] = mapped_column(String(100), nullable=False)
+    lienholder_bank: Mapped[str] = mapped_column(String(255), nullable=False)
+    purpose_facility: Mapped[str] = mapped_column(String(255), nullable=False)
+    board_auth_date: Mapped[str] = mapped_column(String(50), nullable=False)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+
+
+# ---------------------------------------------------------------------------
+# Broker & Dealing Controls
+# ---------------------------------------------------------------------------
+
+class BrokerRecord(Base, TenantMixin):
+    __tablename__ = "mod_investments_brokers"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    broker_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    empaneled_status: Mapped[str] = mapped_column(String(50), nullable=False, default="Empaneled")
+    transaction_volume_ytd: Mapped[str] = mapped_column(String(100), nullable=False)
+    share_pct: Mapped[str] = mapped_column(String(50), nullable=False)
+    commission_paid: Mapped[str] = mapped_column(String(100), nullable=False)
+    avg_commission_rate: Mapped[str] = mapped_column(String(50), nullable=False)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+
+
+# ---------------------------------------------------------------------------
+# Disclosure & Classification (IFRS 9)
+# ---------------------------------------------------------------------------
+
+class DisclosureRecord(Base, TenantMixin):
+    __tablename__ = "mod_investments_disclosures"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    security: Mapped[str] = mapped_column(String(255), nullable=False)
+    business_model: Mapped[str] = mapped_column(String(255), nullable=False)
+    sppi_test_result: Mapped[str] = mapped_column(String(255), nullable=False)
+    accounting_classification: Mapped[str] = mapped_column(String(100), nullable=False)
+    appropriate: Mapped[str] = mapped_column(String(50), nullable=False, default="Passed")
+
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())

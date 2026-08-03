@@ -20,6 +20,19 @@ from .models import (
     WorkingPaper,
     Finding,
     Remediation,
+    ValuationRecord,
+    BoardApprovalRecord,
+    IncomeRecord,
+    RelatedPartyRecord,
+    MaturityRecord,
+    InstrumentRecord,
+    RealisedGainRecord,
+    MandateItem,
+    AccruedIncomeRecord,
+    ImpairmentRecord,
+    PledgedAsset,
+    BrokerRecord,
+    DisclosureRecord,
 )
 from .schemas import (
     RCMControlOut,
@@ -50,6 +63,19 @@ from .schemas import (
     RemediationCreate,
     RemediationStatusUpdate,
     KPISummary,
+    ValuationRecordOut,
+    BoardApprovalRecordOut,
+    IncomeRecordOut,
+    RelatedPartyRecordOut,
+    MaturityRecordOut,
+    InstrumentRecordOut,
+    RealisedGainRecordOut,
+    MandateItemOut,
+    AccruedIncomeRecordOut,
+    ImpairmentRecordOut,
+    PledgedAssetOut,
+    BrokerRecordOut,
+    DisclosureRecordOut,
 )
 from .rule_engine import evaluate_rule, available_threshold_types
 
@@ -185,6 +211,104 @@ def seed_tenant_data_if_empty(db: DbSession, current_user: CurrentUser):
                 description="Recomputes dividend / coupon income and flags any holding whose actual receipt deviates more than this percent from expected amount. (Linked to RCM: Income Accuracy)",
             ),
         ])
+    db.commit()
+
+    # ── Valuation & Fair-Value ────────────────────────────────────────────
+    if tenant_scoped(db.query(ValuationRecord), current_user).count() == 0:
+        db.add_all([
+            ValuationRecord(tenant_id=tenant_id, holding="Goldman Sachs MT Note", cost_price="$100.00", independent_price="$100.25", erp_book_price="$100.00", variance_pct="-0.25%", ecl_triggered="No", status="Passed"),
+            ValuationRecord(tenant_id=tenant_id, holding="Vertex Pharma Paper", cost_price="$100.00", independent_price="$97.50", erp_book_price="$100.00", variance_pct="+2.56%", ecl_triggered="Yes (Rating Downgrade BBB+)", status="Review Needed"),
+            ValuationRecord(tenant_id=tenant_id, holding="Amazon Paper 2027", cost_price="$100.00", independent_price="$99.95", erp_book_price="$99.95", variance_pct="0.00%", ecl_triggered="No", status="Passed"),
+        ])
+
+    # ── Board Approval vs Limits ──────────────────────────────────────────
+    if tenant_scoped(db.query(BoardApprovalRecord), current_user).count() == 0:
+        db.add_all([
+            BoardApprovalRecord(tenant_id=tenant_id, security="Tesla Inc. Corporate Note", investment_amount="$12,500,000", authorized_signatory="CFO Sign-off Only", resolution_ref="Missing Resolution", approval_status="Breach: Limit Exceeded", cfo_limit="$2,000,000", committee_limit="$5,000,000", board_limit="Unlimited"),
+            BoardApprovalRecord(tenant_id=tenant_id, security="Vertex Pharma Commercial Paper", investment_amount="$8,000,000", authorized_signatory="Board Committee", resolution_ref="RES-2026-901", approval_status="Approved", cfo_limit="$2,000,000", committee_limit="$5,000,000", board_limit="Unlimited"),
+        ])
+
+    # ── Income Recomputation ──────────────────────────────────────────────
+    if tenant_scoped(db.query(IncomeRecord), current_user).count() == 0:
+        db.add_all([
+            IncomeRecord(tenant_id=tenant_id, holding_security="Tesla Inc. Note", coupon_rate="4.50%", daycount="30/360", expected_coupon="$281,250", actual_received="$281,250", variance="$0", status="Match"),
+            IncomeRecord(tenant_id=tenant_id, holding_security="Apex Global Equities", coupon_rate="4.50% (declared)", daycount="Act/365", expected_coupon="$67,500", actual_received="$36,000", variance="-$31,500", status="Mismatch"),
+        ])
+
+    # ── Related-Party Investment Flag ─────────────────────────────────────
+    if tenant_scoped(db.query(RelatedPartyRecord), current_user).count() == 0:
+        db.add_all([
+            RelatedPartyRecord(tenant_id=tenant_id, asset_name="Cap Corp Logistics Debentures", relationship="Subsidiary (100% Owned)", exposure_amount="$3,000,000", disclosure_status="Declared in Note 24", approval_status="Approved"),
+            RelatedPartyRecord(tenant_id=tenant_id, asset_name="Apex Global Equities", relationship="Associate (CFO holds Board seat)", exposure_amount="$1,500,000", disclosure_status="Not Disclosed", approval_status="No Approval Record"),
+        ])
+
+    # ── Maturity & Rollover Tracking ──────────────────────────────────────
+    if tenant_scoped(db.query(MaturityRecord), current_user).count() == 0:
+        db.add_all([
+            MaturityRecord(tenant_id=tenant_id, security_name="Chevron Corp Debenture", maturity_date="2026-08-15", rollover_terms="N/A (Settle Cash)", authorized_by="Treasury Desk", action_required="Settle Cash"),
+            MaturityRecord(tenant_id=tenant_id, security_name="Evergreen Property Trust", maturity_date="2026-07-10 (Overdue)", rollover_terms="Extended +3 Years @ 4.8%", authorized_by="No Sign-off", action_required="Unresolved Extension"),
+        ])
+
+    # ── Instrument Master Governance ──────────────────────────────────────
+    if tenant_scoped(db.query(InstrumentRecord), current_user).count() == 0:
+        db.add_all([
+            InstrumentRecord(tenant_id=tenant_id, isin="US88160R1014", issuer="Tesla Inc.", asset_class="Corporate Bond", credit_rating="BBB / Baa2", allowed_per_ips="Yes"),
+            InstrumentRecord(tenant_id=tenant_id, isin="US92532F1003", issuer="Vertex Pharma", asset_class="Commercial Paper", credit_rating="BBB+ / Baa1 (Downgraded)", allowed_per_ips="No (Rating Below A-)"),
+            InstrumentRecord(tenant_id=tenant_id, isin="US5949181045", issuer="Microsoft Corp", asset_class="Treasury Note", credit_rating="AAA / Aaa", allowed_per_ips="Yes"),
+        ])
+
+    # ── Realised Gain/Loss Testing ────────────────────────────────────────
+    if tenant_scoped(db.query(RealisedGainRecord), current_user).count() == 0:
+        db.add_all([
+            RealisedGainRecord(tenant_id=tenant_id, sold_security="Apple Inc. Bond (Partial Sale)", sale_date="2026-06-15", proceeds="$5,100,000", calculated_cost_fifo="$5,000,000", reported_gain_loss="+$100,000", auditor_recomputed="+$100,000", variance="$0", status="Match"),
+            RealisedGainRecord(tenant_id=tenant_id, sold_security="Goldman Sachs Note (Full)", sale_date="2026-05-30", proceeds="$3,550,000", calculated_cost_fifo="$3,500,000", reported_gain_loss="+$50,000", auditor_recomputed="+$50,000", variance="$0", status="Match"),
+        ])
+
+    # ── Mandate & Policy Compliance ───────────────────────────────────────
+    if tenant_scoped(db.query(MandateItem), current_user).count() == 0:
+        db.add_all([
+            MandateItem(tenant_id=tenant_id, description="Maximum Equity Exposure limit < 15% (Current: 8.2%) - Compliant", status="Compliant"),
+            MandateItem(tenant_id=tenant_id, description="Minimum Credit Quality of debt assets > A- (Breach: Vertex Pharma Downgraded to BBB+) - Breach", status="Breach"),
+            MandateItem(tenant_id=tenant_id, description="Minimum liquid assets pool > $20,000,000 (Current: $24,500,000) - Compliant", status="Compliant"),
+        ])
+
+    # ── Accrued Income Ageing ─────────────────────────────────────────────
+    if tenant_scoped(db.query(AccruedIncomeRecord), current_user).count() == 0:
+        db.add_all([
+            AccruedIncomeRecord(tenant_id=tenant_id, security="JPMorgan Certificate of Deposit", interest_accrued="$110,000", not_due="$110,000", overdue_1_30="$0", overdue_31_90="$0", overdue_90_plus="$0"),
+            AccruedIncomeRecord(tenant_id=tenant_id, security="Evergreen Property Trust Bond", interest_accrued="$84,000", not_due="$0", overdue_1_30="$0", overdue_31_90="$84,000", overdue_90_plus="$0"),
+        ])
+
+    # ── Impairment Trigger Screening ──────────────────────────────────────
+    if tenant_scoped(db.query(ImpairmentRecord), current_user).count() == 0:
+        db.add_all([
+            ImpairmentRecord(tenant_id=tenant_id, security="NextEra Energy Green Bond", holding_value="$14,000,000", sp_rating="A+", ifrs9_stage="Stage 1", impairment_triggered="No", provision_amount="$0"),
+            ImpairmentRecord(tenant_id=tenant_id, security="Vertex Pharma Paper", holding_value="$8,000,000", sp_rating="BBB+", ifrs9_stage="Stage 2 (Significant Increase in Credit Risk)", impairment_triggered="Yes", provision_amount="$160,000 (2.0%)"),
+        ])
+
+    # ── Pledged / Lien Investments ────────────────────────────────────────
+    if tenant_scoped(db.query(PledgedAsset), current_user).count() == 0:
+        db.add_all([
+            PledgedAsset(tenant_id=tenant_id, pledged_asset="Microsoft Corp Note", pledged_value="$10,000,000", lienholder_bank="HSBC Bank", purpose_facility="Working Capital Overdraft Margin", board_auth_date="2025-10-12"),
+            PledgedAsset(tenant_id=tenant_id, pledged_asset="Amazon Paper 2027", pledged_value="$6,000,000", lienholder_bank="Citibank", purpose_facility="Letter of Credit Facility", board_auth_date="2025-11-05"),
+        ])
+
+    # ── Broker & Dealing Controls ─────────────────────────────────────────
+    if tenant_scoped(db.query(BrokerRecord), current_user).count() == 0:
+        db.add_all([
+            BrokerRecord(tenant_id=tenant_id, broker_name="Morgan Stanley India", empaneled_status="Empaneled", transaction_volume_ytd="$45,000,000", share_pct="42.0%", commission_paid="$45,000", avg_commission_rate="0.10%"),
+            BrokerRecord(tenant_id=tenant_id, broker_name="Goldman Sachs Brokerage", empaneled_status="Empaneled", transaction_volume_ytd="$35,000,000", share_pct="33.0%", commission_paid="$35,000", avg_commission_rate="0.10%"),
+            BrokerRecord(tenant_id=tenant_id, broker_name="Alpha Global Dealing Desk", empaneled_status="Not Empaneled", transaction_volume_ytd="$25,000,000", share_pct="25.0%", commission_paid="$37,500", avg_commission_rate="0.15% (Exceeds Policy Cap)"),
+        ])
+
+    # ── Disclosure & Classification ───────────────────────────────────────
+    if tenant_scoped(db.query(DisclosureRecord), current_user).count() == 0:
+        db.add_all([
+            DisclosureRecord(tenant_id=tenant_id, security="JPMorgan Cert of Deposit", business_model="Hold to Collect Cash Flows", sppi_test_result="Pass (Solely Principal & Interest)", accounting_classification="Amortized Cost", appropriate="Passed"),
+            DisclosureRecord(tenant_id=tenant_id, security="Apex Global Equities", business_model="Trading / Capital Appreciation", sppi_test_result="Fail (Equity Dividends)", accounting_classification="FVTPL (Fair Value through P&L)", appropriate="Passed"),
+            DisclosureRecord(tenant_id=tenant_id, security="Microsoft Corp Note 2029", business_model="Hold to Collect & Sell", sppi_test_result="Pass (Solely Principal & Interest)", accounting_classification="FVOCI (Fair Value through OCI)", appropriate="Passed"),
+        ])
+
     db.commit()
 
 
@@ -994,3 +1118,391 @@ def get_kpis(current_user: CurrentUser, db: DbSession):
         compliance_trend=[ComplianceTrendPointOut.model_validate(t) for t in compliance_trend],
         rcm_controls_count=rcm_controls_count,
     )
+
+
+# ---------------------------------------------------------------------------
+# Signature Tab Endpoints
+# ---------------------------------------------------------------------------
+
+@router.get("/valuation-records", response_model=list[ValuationRecordOut])
+def list_valuation_records(current_user: CurrentUser, db: DbSession):
+    seed_tenant_data_if_empty(db, current_user)
+    return tenant_scoped(db.query(ValuationRecord), current_user).order_by(ValuationRecord.id.asc()).all()
+
+@router.post("/valuation-records", response_model=ValuationRecordOut, status_code=201)
+def create_valuation_record(payload: dict, current_user: CurrentUser, db: DbSession):
+    rec = ValuationRecord(
+        tenant_id=current_user.tenant_id,
+        holding=payload.get("holding", "New Holding"),
+        cost_price=payload.get("cost_price", "$100.00"),
+        independent_price=payload.get("independent_price", "$100.00"),
+        erp_book_price=payload.get("erp_book_price", "$100.00"),
+        variance_pct=payload.get("variance_pct", "0.00%"),
+        ecl_triggered=payload.get("ecl_triggered", "No"),
+        status=payload.get("status", "Passed"),
+    )
+    db.add(rec)
+    db.commit()
+    db.refresh(rec)
+    return rec
+
+@router.delete("/valuation-records/{rec_id}", status_code=204)
+def delete_valuation_record(rec_id: int, current_user: CurrentUser, db: DbSession):
+    rec = tenant_scoped(db.query(ValuationRecord), current_user).filter(ValuationRecord.id == rec_id).first()
+    if rec:
+        db.delete(rec)
+        db.commit()
+    return None
+
+
+@router.get("/board-approval-records", response_model=list[BoardApprovalRecordOut])
+def list_board_approval_records(current_user: CurrentUser, db: DbSession):
+    seed_tenant_data_if_empty(db, current_user)
+    return tenant_scoped(db.query(BoardApprovalRecord), current_user).order_by(BoardApprovalRecord.id.asc()).all()
+
+@router.post("/board-approval-records", response_model=BoardApprovalRecordOut, status_code=201)
+def create_board_approval_record(payload: dict, current_user: CurrentUser, db: DbSession):
+    rec = BoardApprovalRecord(
+        tenant_id=current_user.tenant_id,
+        security=payload.get("security", "New Security"),
+        investment_amount=payload.get("investment_amount", "$1,000,000"),
+        authorized_signatory=payload.get("authorized_signatory", "Investment Committee"),
+        resolution_ref=payload.get("resolution_ref", "RES-2026-NEW"),
+        approval_status=payload.get("approval_status", "Approved"),
+    )
+    db.add(rec)
+    db.commit()
+    db.refresh(rec)
+    return rec
+
+@router.delete("/board-approval-records/{rec_id}", status_code=204)
+def delete_board_approval_record(rec_id: int, current_user: CurrentUser, db: DbSession):
+    rec = tenant_scoped(db.query(BoardApprovalRecord), current_user).filter(BoardApprovalRecord.id == rec_id).first()
+    if rec:
+        db.delete(rec)
+        db.commit()
+    return None
+
+
+@router.get("/income-records", response_model=list[IncomeRecordOut])
+def list_income_records(current_user: CurrentUser, db: DbSession):
+    seed_tenant_data_if_empty(db, current_user)
+    return tenant_scoped(db.query(IncomeRecord), current_user).order_by(IncomeRecord.id.asc()).all()
+
+@router.post("/income-records", response_model=IncomeRecordOut, status_code=201)
+def create_income_record(payload: dict, current_user: CurrentUser, db: DbSession):
+    rec = IncomeRecord(
+        tenant_id=current_user.tenant_id,
+        holding_security=payload.get("holding_security", "New Security"),
+        coupon_rate=payload.get("coupon_rate", "5.00%"),
+        daycount=payload.get("daycount", "30/360"),
+        expected_coupon=payload.get("expected_coupon", "$50,000"),
+        actual_received=payload.get("actual_received", "$50,000"),
+        variance=payload.get("variance", "$0"),
+        status=payload.get("status", "Match"),
+    )
+    db.add(rec)
+    db.commit()
+    db.refresh(rec)
+    return rec
+
+@router.delete("/income-records/{rec_id}", status_code=204)
+def delete_income_record(rec_id: int, current_user: CurrentUser, db: DbSession):
+    rec = tenant_scoped(db.query(IncomeRecord), current_user).filter(IncomeRecord.id == rec_id).first()
+    if rec:
+        db.delete(rec)
+        db.commit()
+    return None
+
+
+@router.get("/related-party-records", response_model=list[RelatedPartyRecordOut])
+def list_related_party_records(current_user: CurrentUser, db: DbSession):
+    seed_tenant_data_if_empty(db, current_user)
+    return tenant_scoped(db.query(RelatedPartyRecord), current_user).order_by(RelatedPartyRecord.id.asc()).all()
+
+@router.post("/related-party-records", response_model=RelatedPartyRecordOut, status_code=201)
+def create_related_party_record(payload: dict, current_user: CurrentUser, db: DbSession):
+    rec = RelatedPartyRecord(
+        tenant_id=current_user.tenant_id,
+        asset_name=payload.get("asset_name", "New Asset"),
+        relationship=payload.get("relationship", "Subsidiary"),
+        exposure_amount=payload.get("exposure_amount", "$1,000,000"),
+        disclosure_status=payload.get("disclosure_status", "Declared"),
+        approval_status=payload.get("approval_status", "Approved"),
+    )
+    db.add(rec)
+    db.commit()
+    db.refresh(rec)
+    return rec
+
+@router.delete("/related-party-records/{rec_id}", status_code=204)
+def delete_related_party_record(rec_id: int, current_user: CurrentUser, db: DbSession):
+    rec = tenant_scoped(db.query(RelatedPartyRecord), current_user).filter(RelatedPartyRecord.id == rec_id).first()
+    if rec:
+        db.delete(rec)
+        db.commit()
+    return None
+
+
+@router.get("/maturity-records", response_model=list[MaturityRecordOut])
+def list_maturity_records(current_user: CurrentUser, db: DbSession):
+    seed_tenant_data_if_empty(db, current_user)
+    return tenant_scoped(db.query(MaturityRecord), current_user).order_by(MaturityRecord.id.asc()).all()
+
+@router.post("/maturity-records", response_model=MaturityRecordOut, status_code=201)
+def create_maturity_record(payload: dict, current_user: CurrentUser, db: DbSession):
+    rec = MaturityRecord(
+        tenant_id=current_user.tenant_id,
+        security_name=payload.get("security_name", "New Security"),
+        maturity_date=payload.get("maturity_date", "2026-12-31"),
+        rollover_terms=payload.get("rollover_terms", "N/A"),
+        authorized_by=payload.get("authorized_by", "Treasury Desk"),
+        action_required=payload.get("action_required", "Settle Cash"),
+    )
+    db.add(rec)
+    db.commit()
+    db.refresh(rec)
+    return rec
+
+@router.delete("/maturity-records/{rec_id}", status_code=204)
+def delete_maturity_record(rec_id: int, current_user: CurrentUser, db: DbSession):
+    rec = tenant_scoped(db.query(MaturityRecord), current_user).filter(MaturityRecord.id == rec_id).first()
+    if rec:
+        db.delete(rec)
+        db.commit()
+    return None
+
+
+@router.get("/instrument-records", response_model=list[InstrumentRecordOut])
+def list_instrument_records(current_user: CurrentUser, db: DbSession):
+    seed_tenant_data_if_empty(db, current_user)
+    return tenant_scoped(db.query(InstrumentRecord), current_user).order_by(InstrumentRecord.id.asc()).all()
+
+@router.post("/instrument-records", response_model=InstrumentRecordOut, status_code=201)
+def create_instrument_record(payload: dict, current_user: CurrentUser, db: DbSession):
+    rec = InstrumentRecord(
+        tenant_id=current_user.tenant_id,
+        isin=payload.get("isin", "US0000000000"),
+        issuer=payload.get("issuer", "New Issuer"),
+        asset_class=payload.get("asset_class", "Corporate Bond"),
+        credit_rating=payload.get("credit_rating", "AA"),
+        allowed_per_ips=payload.get("allowed_per_ips", "Yes"),
+    )
+    db.add(rec)
+    db.commit()
+    db.refresh(rec)
+    return rec
+
+@router.delete("/instrument-records/{rec_id}", status_code=204)
+def delete_instrument_record(rec_id: int, current_user: CurrentUser, db: DbSession):
+    rec = tenant_scoped(db.query(InstrumentRecord), current_user).filter(InstrumentRecord.id == rec_id).first()
+    if rec:
+        db.delete(rec)
+        db.commit()
+    return None
+
+
+@router.get("/realised-gain-records", response_model=list[RealisedGainRecordOut])
+def list_realised_gain_records(current_user: CurrentUser, db: DbSession):
+    seed_tenant_data_if_empty(db, current_user)
+    return tenant_scoped(db.query(RealisedGainRecord), current_user).order_by(RealisedGainRecord.id.asc()).all()
+
+@router.post("/realised-gain-records", response_model=RealisedGainRecordOut, status_code=201)
+def create_realised_gain_record(payload: dict, current_user: CurrentUser, db: DbSession):
+    rec = RealisedGainRecord(
+        tenant_id=current_user.tenant_id,
+        sold_security=payload.get("sold_security", "Sold Bond"),
+        sale_date=payload.get("sale_date", "2026-07-01"),
+        proceeds=payload.get("proceeds", "$1,000,000"),
+        calculated_cost_fifo=payload.get("calculated_cost_fifo", "$950,000"),
+        reported_gain_loss=payload.get("reported_gain_loss", "+$50,000"),
+        auditor_recomputed=payload.get("auditor_recomputed", "+$50,000"),
+        variance=payload.get("variance", "$0"),
+        status=payload.get("status", "Match"),
+    )
+    db.add(rec)
+    db.commit()
+    db.refresh(rec)
+    return rec
+
+@router.delete("/realised-gain-records/{rec_id}", status_code=204)
+def delete_realised_gain_record(rec_id: int, current_user: CurrentUser, db: DbSession):
+    rec = tenant_scoped(db.query(RealisedGainRecord), current_user).filter(RealisedGainRecord.id == rec_id).first()
+    if rec:
+        db.delete(rec)
+        db.commit()
+    return None
+
+
+@router.get("/mandates", response_model=list[MandateItemOut])
+def list_mandates(current_user: CurrentUser, db: DbSession):
+    seed_tenant_data_if_empty(db, current_user)
+    return tenant_scoped(db.query(MandateItem), current_user).order_by(MandateItem.id.asc()).all()
+
+@router.post("/mandates", response_model=MandateItemOut, status_code=201)
+def create_mandate(payload: dict, current_user: CurrentUser, db: DbSession):
+    rec = MandateItem(
+        tenant_id=current_user.tenant_id,
+        description=payload.get("description", "New policy mandate check"),
+        status=payload.get("status", "Compliant"),
+    )
+    db.add(rec)
+    db.commit()
+    db.refresh(rec)
+    return rec
+
+@router.delete("/mandates/{rec_id}", status_code=204)
+def delete_mandate(rec_id: int, current_user: CurrentUser, db: DbSession):
+    rec = tenant_scoped(db.query(MandateItem), current_user).filter(MandateItem.id == rec_id).first()
+    if rec:
+        db.delete(rec)
+        db.commit()
+    return None
+
+
+@router.get("/accrued-income-records", response_model=list[AccruedIncomeRecordOut])
+def list_accrued_income_records(current_user: CurrentUser, db: DbSession):
+    seed_tenant_data_if_empty(db, current_user)
+    return tenant_scoped(db.query(AccruedIncomeRecord), current_user).order_by(AccruedIncomeRecord.id.asc()).all()
+
+@router.post("/accrued-income-records", response_model=AccruedIncomeRecordOut, status_code=201)
+def create_accrued_income_record(payload: dict, current_user: CurrentUser, db: DbSession):
+    rec = AccruedIncomeRecord(
+        tenant_id=current_user.tenant_id,
+        security=payload.get("security", "New CD / Bond"),
+        interest_accrued=payload.get("interest_accrued", "$50,000"),
+        not_due=payload.get("not_due", "$50,000"),
+        overdue_1_30=payload.get("overdue_1_30", "$0"),
+        overdue_31_90=payload.get("overdue_31_90", "$0"),
+        overdue_90_plus=payload.get("overdue_90_plus", "$0"),
+    )
+    db.add(rec)
+    db.commit()
+    db.refresh(rec)
+    return rec
+
+@router.delete("/accrued-income-records/{rec_id}", status_code=204)
+def delete_accrued_income_record(rec_id: int, current_user: CurrentUser, db: DbSession):
+    rec = tenant_scoped(db.query(AccruedIncomeRecord), current_user).filter(AccruedIncomeRecord.id == rec_id).first()
+    if rec:
+        db.delete(rec)
+        db.commit()
+    return None
+
+
+@router.get("/impairment-records", response_model=list[ImpairmentRecordOut])
+def list_impairment_records(current_user: CurrentUser, db: DbSession):
+    seed_tenant_data_if_empty(db, current_user)
+    return tenant_scoped(db.query(ImpairmentRecord), current_user).order_by(ImpairmentRecord.id.asc()).all()
+
+@router.post("/impairment-records", response_model=ImpairmentRecordOut, status_code=201)
+def create_impairment_record(payload: dict, current_user: CurrentUser, db: DbSession):
+    rec = ImpairmentRecord(
+        tenant_id=current_user.tenant_id,
+        security=payload.get("security", "New Bond"),
+        holding_value=payload.get("holding_value", "$5,000,000"),
+        sp_rating=payload.get("sp_rating", "A"),
+        ifrs9_stage=payload.get("ifrs9_stage", "Stage 1"),
+        impairment_triggered=payload.get("impairment_triggered", "No"),
+        provision_amount=payload.get("provision_amount", "$0"),
+    )
+    db.add(rec)
+    db.commit()
+    db.refresh(rec)
+    return rec
+
+@router.delete("/impairment-records/{rec_id}", status_code=204)
+def delete_impairment_record(rec_id: int, current_user: CurrentUser, db: DbSession):
+    rec = tenant_scoped(db.query(ImpairmentRecord), current_user).filter(ImpairmentRecord.id == rec_id).first()
+    if rec:
+        db.delete(rec)
+        db.commit()
+    return None
+
+
+@router.get("/pledged-assets", response_model=list[PledgedAssetOut])
+def list_pledged_assets(current_user: CurrentUser, db: DbSession):
+    seed_tenant_data_if_empty(db, current_user)
+    return tenant_scoped(db.query(PledgedAsset), current_user).order_by(PledgedAsset.id.asc()).all()
+
+@router.post("/pledged-assets", response_model=PledgedAssetOut, status_code=201)
+def create_pledged_asset(payload: dict, current_user: CurrentUser, db: DbSession):
+    rec = PledgedAsset(
+        tenant_id=current_user.tenant_id,
+        pledged_asset=payload.get("pledged_asset", "New Pledged Asset"),
+        pledged_value=payload.get("pledged_value", "$5,000,000"),
+        lienholder_bank=payload.get("lienholder_bank", "JPMorgan Chase"),
+        purpose_facility=payload.get("purpose_facility", "Credit Line Margin"),
+        board_auth_date=payload.get("board_auth_date", "2026-01-15"),
+    )
+    db.add(rec)
+    db.commit()
+    db.refresh(rec)
+    return rec
+
+@router.delete("/pledged-assets/{rec_id}", status_code=204)
+def delete_pledged_asset(rec_id: int, current_user: CurrentUser, db: DbSession):
+    rec = tenant_scoped(db.query(PledgedAsset), current_user).filter(PledgedAsset.id == rec_id).first()
+    if rec:
+        db.delete(rec)
+        db.commit()
+    return None
+
+
+@router.get("/broker-records", response_model=list[BrokerRecordOut])
+def list_broker_records(current_user: CurrentUser, db: DbSession):
+    seed_tenant_data_if_empty(db, current_user)
+    return tenant_scoped(db.query(BrokerRecord), current_user).order_by(BrokerRecord.id.asc()).all()
+
+@router.post("/broker-records", response_model=BrokerRecordOut, status_code=201)
+def create_broker_record(payload: dict, current_user: CurrentUser, db: DbSession):
+    rec = BrokerRecord(
+        tenant_id=current_user.tenant_id,
+        broker_name=payload.get("broker_name", "New Broker"),
+        empaneled_status=payload.get("empaneled_status", "Empaneled"),
+        transaction_volume_ytd=payload.get("transaction_volume_ytd", "$10,000,000"),
+        share_pct=payload.get("share_pct", "10.0%"),
+        commission_paid=payload.get("commission_paid", "$10,000"),
+        avg_commission_rate=payload.get("avg_commission_rate", "0.10%"),
+    )
+    db.add(rec)
+    db.commit()
+    db.refresh(rec)
+    return rec
+
+@router.delete("/broker-records/{rec_id}", status_code=204)
+def delete_broker_record(rec_id: int, current_user: CurrentUser, db: DbSession):
+    rec = tenant_scoped(db.query(BrokerRecord), current_user).filter(BrokerRecord.id == rec_id).first()
+    if rec:
+        db.delete(rec)
+        db.commit()
+    return None
+
+
+@router.get("/disclosure-records", response_model=list[DisclosureRecordOut])
+def list_disclosure_records(current_user: CurrentUser, db: DbSession):
+    seed_tenant_data_if_empty(db, current_user)
+    return tenant_scoped(db.query(DisclosureRecord), current_user).order_by(DisclosureRecord.id.asc()).all()
+
+@router.post("/disclosure-records", response_model=DisclosureRecordOut, status_code=201)
+def create_disclosure_record(payload: dict, current_user: CurrentUser, db: DbSession):
+    rec = DisclosureRecord(
+        tenant_id=current_user.tenant_id,
+        security=payload.get("security", "New Security"),
+        business_model=payload.get("business_model", "Hold to Collect"),
+        sppi_test_result=payload.get("sppi_test_result", "Pass"),
+        accounting_classification=payload.get("accounting_classification", "Amortized Cost"),
+        appropriate=payload.get("appropriate", "Passed"),
+    )
+    db.add(rec)
+    db.commit()
+    db.refresh(rec)
+    return rec
+
+@router.delete("/disclosure-records/{rec_id}", status_code=204)
+def delete_disclosure_record(rec_id: int, current_user: CurrentUser, db: DbSession):
+    rec = tenant_scoped(db.query(DisclosureRecord), current_user).filter(DisclosureRecord.id == rec_id).first()
+    if rec:
+        db.delete(rec)
+        db.commit()
+    return None

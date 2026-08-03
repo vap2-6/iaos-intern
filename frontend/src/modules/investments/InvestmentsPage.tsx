@@ -212,6 +212,135 @@ interface AuditableUnit {
   inScope: string;
 }
 
+// ── Signature Tab Data Types ─────────────────────────────────────────────────
+
+interface ValuationRecord {
+  id: number;
+  holding: string;
+  cost_price: string;
+  independent_price: string;
+  erp_book_price: string;
+  variance_pct: string;
+  ecl_triggered: string;
+  status: string;
+}
+
+interface BoardApprovalRecord {
+  id: number;
+  security: string;
+  investment_amount: string;
+  authorized_signatory: string;
+  resolution_ref: string;
+  approval_status: string;
+  cfo_limit: string;
+  committee_limit: string;
+  board_limit: string;
+}
+
+interface IncomeRecord {
+  id: number;
+  holding_security: string;
+  coupon_rate: string;
+  daycount: string;
+  expected_coupon: string;
+  actual_received: string;
+  variance: string;
+  status: string;
+}
+
+interface RelatedPartyRecord {
+  id: number;
+  asset_name: string;
+  relationship: string;
+  exposure_amount: string;
+  disclosure_status: string;
+  approval_status: string;
+}
+
+interface MaturityRecord {
+  id: number;
+  security_name: string;
+  maturity_date: string;
+  rollover_terms: string;
+  authorized_by: string;
+  action_required: string;
+}
+
+interface InstrumentRecord {
+  id: number;
+  isin: string;
+  issuer: string;
+  asset_class: string;
+  credit_rating: string;
+  allowed_per_ips: string;
+}
+
+interface RealisedGainRecord {
+  id: number;
+  sold_security: string;
+  sale_date: string;
+  proceeds: string;
+  calculated_cost_fifo: string;
+  reported_gain_loss: string;
+  auditor_recomputed: string;
+  variance: string;
+  status: string;
+}
+
+interface MandateItem {
+  id: number;
+  description: string;
+  status: string; // "Compliant" | "Breach"
+}
+
+interface AccruedIncomeRecord {
+  id: number;
+  security: string;
+  interest_accrued: string;
+  not_due: string;
+  overdue_1_30: string;
+  overdue_31_90: string;
+  overdue_90_plus: string;
+}
+
+interface ImpairmentRecord {
+  id: number;
+  security: string;
+  holding_value: string;
+  sp_rating: string;
+  ifrs9_stage: string;
+  impairment_triggered: string;
+  provision_amount: string;
+}
+
+interface PledgedAsset {
+  id: number;
+  pledged_asset: string;
+  pledged_value: string;
+  lienholder_bank: string;
+  purpose_facility: string;
+  board_auth_date: string;
+}
+
+interface BrokerRecord {
+  id: number;
+  broker_name: string;
+  empaneled_status: string;
+  transaction_volume_ytd: string;
+  share_pct: string;
+  commission_paid: string;
+  avg_commission_rate: string;
+}
+
+interface DisclosureRecord {
+  id: number;
+  security: string;
+  business_model: string;
+  sppi_test_result: string;
+  accounting_classification: string;
+  appropriate: string;
+}
+
 const INITIAL_WORKING_PAPERS: WorkingPaperDoc[] = [
   {
     id: "wp-1",
@@ -326,6 +455,72 @@ const INITIAL_FINDINGS: AuditFinding[] = [
   },
 ];
 
+const DEFAULT_VALUATION_RECORDS: ValuationRecord[] = [
+  { id: 1, holding: "Goldman Sachs MT Note", cost_price: "$100.00", independent_price: "$100.25", erp_book_price: "$100.00", variance_pct: "-0.25%", ecl_triggered: "No", status: "Passed" },
+  { id: 2, holding: "Vertex Pharma Paper", cost_price: "$100.00", independent_price: "$97.50", erp_book_price: "$100.00", variance_pct: "+2.56%", ecl_triggered: "Yes (Rating Downgrade BBB+)", status: "Review Needed" },
+  { id: 3, holding: "Amazon Paper 2027", cost_price: "$100.00", independent_price: "$99.95", erp_book_price: "$99.95", variance_pct: "0.00%", ecl_triggered: "No", status: "Passed" },
+];
+
+const DEFAULT_BOARD_APPROVAL_RECORDS: BoardApprovalRecord[] = [
+  { id: 1, security: "Tesla Inc. Corporate Note", investment_amount: "$12,500,000", authorized_signatory: "CFO Sign-off Only", resolution_ref: "Missing Resolution", approval_status: "Breach: Limit Exceeded", cfo_limit: "$2,000,000", committee_limit: "$5,000,000", board_limit: "Unlimited" },
+  { id: 2, security: "Vertex Pharma Commercial Paper", investment_amount: "$8,000,000", authorized_signatory: "Board Committee", resolution_ref: "RES-2026-901", approval_status: "Approved", cfo_limit: "$2,000,000", committee_limit: "$5,000,000", board_limit: "Unlimited" },
+];
+
+const DEFAULT_INCOME_RECORDS: IncomeRecord[] = [
+  { id: 1, holding_security: "Tesla Inc. Note", coupon_rate: "4.50%", daycount: "30/360", expected_coupon: "$281,250", actual_received: "$281,250", variance: "$0", status: "Match" },
+  { id: 2, holding_security: "Apex Global Equities", coupon_rate: "4.50% (declared)", daycount: "Act/365", expected_coupon: "$67,500", actual_received: "$36,000", variance: "-$31,500", status: "Mismatch" },
+];
+
+const DEFAULT_RELATED_PARTY_RECORDS: RelatedPartyRecord[] = [
+  { id: 1, asset_name: "Cap Corp Logistics Debentures", relationship: "Subsidiary (100% Owned)", exposure_amount: "$3,000,000", disclosure_status: "Declared in Note 24", approval_status: "Approved" },
+  { id: 2, asset_name: "Apex Global Equities", relationship: "Associate (CFO holds Board seat)", exposure_amount: "$1,500,000", disclosure_status: "Not Disclosed", approval_status: "No Approval Record" },
+];
+
+const DEFAULT_MATURITY_RECORDS: MaturityRecord[] = [
+  { id: 1, security_name: "Chevron Corp Debenture", maturity_date: "2026-08-15", rollover_terms: "N/A (Settle Cash)", authorized_by: "Treasury Desk", action_required: "Settle Cash" },
+  { id: 2, security_name: "Evergreen Property Trust", maturity_date: "2026-07-10 (Overdue)", rollover_terms: "Extended +3 Years @ 4.8%", authorized_by: "No Sign-off", action_required: "Unresolved Extension" },
+];
+
+const DEFAULT_INSTRUMENT_RECORDS: InstrumentRecord[] = [
+  { id: 1, isin: "US88160R1014", issuer: "Tesla Inc.", asset_class: "Corporate Bond", credit_rating: "BBB / Baa2", allowed_per_ips: "Yes" },
+  { id: 2, isin: "US92532F1003", issuer: "Vertex Pharma", asset_class: "Commercial Paper", credit_rating: "BBB+ / Baa1 (Downgraded)", allowed_per_ips: "No (Rating Below A-)" },
+];
+
+const DEFAULT_REALISED_GAIN_RECORDS: RealisedGainRecord[] = [
+  { id: 1, sold_security: "Apple Inc. Bond (Partial Sale)", sale_date: "2026-06-15", proceeds: "$5,100,000", calculated_cost_fifo: "$5,000,000", reported_gain_loss: "+$100,000", auditor_recomputed: "+$100,000", variance: "$0", status: "Match" },
+];
+
+const DEFAULT_MANDATES: MandateItem[] = [
+  { id: 1, description: "Maximum Equity Exposure limit < 15% (Current: 8.2%) - Compliant", status: "Compliant" },
+  { id: 2, description: "Minimum Credit Quality of debt assets > A- (Breach: Vertex Pharma Downgraded to BBB+) - Breach", status: "Breach" },
+  { id: 3, description: "Minimum liquid assets pool > $20,000,000 (Current: $24,500,000) - Compliant", status: "Compliant" },
+];
+
+const DEFAULT_ACCRUED_INCOME_RECORDS: AccruedIncomeRecord[] = [
+  { id: 1, security: "JPMorgan Certificate of Deposit", interest_accrued: "$110,000", not_due: "$110,000", overdue_1_30: "$0", overdue_31_90: "$0", overdue_90_plus: "$0" },
+  { id: 2, security: "Evergreen Property Trust Bond", interest_accrued: "$84,000", not_due: "$0", overdue_1_30: "$0", overdue_31_90: "$84,000", overdue_90_plus: "$0" },
+];
+
+const DEFAULT_IMPAIRMENT_RECORDS: ImpairmentRecord[] = [
+  { id: 1, security: "NextEra Energy Green Bond", holding_value: "$14,000,000", sp_rating: "A+", ifrs9_stage: "Stage 1", impairment_triggered: "No", provision_amount: "$0" },
+  { id: 2, security: "Vertex Pharma Paper", holding_value: "$8,000,000", sp_rating: "BBB+", ifrs9_stage: "Stage 2 (Significant Increase in Credit Risk)", impairment_triggered: "Yes", provision_amount: "$160,000 (2.0%)" },
+];
+
+const DEFAULT_PLEDGED_ASSETS: PledgedAsset[] = [
+  { id: 1, pledged_asset: "Microsoft Corp Note", pledged_value: "$10,000,000", lienholder_bank: "HSBC Bank", purpose_facility: "Working Capital Overdraft Margin", board_auth_date: "2025-10-12" },
+];
+
+const DEFAULT_BROKER_RECORDS: BrokerRecord[] = [
+  { id: 1, broker_name: "Morgan Stanley India", empaneled_status: "Empaneled", transaction_volume_ytd: "$45,000,000", share_pct: "42.0%", commission_paid: "$45,000", avg_commission_rate: "0.10%" },
+  { id: 2, broker_name: "Goldman Sachs Brokerage", empaneled_status: "Empaneled", transaction_volume_ytd: "$35,000,000", share_pct: "33.0%", commission_paid: "$35,000", avg_commission_rate: "0.10%" },
+  { id: 3, broker_name: "Alpha Global Dealing Desk", empaneled_status: "Not Empaneled", transaction_volume_ytd: "$25,000,000", share_pct: "25.0%", commission_paid: "$37,500", avg_commission_rate: "0.15% (Exceeds Policy Cap)" },
+];
+
+const DEFAULT_DISCLOSURE_RECORDS: DisclosureRecord[] = [
+  { id: 1, security: "JPMorgan Cert of Deposit", business_model: "Hold to Collect Cash Flows", sppi_test_result: "Pass (Solely Principal & Interest)", accounting_classification: "Amortized Cost", appropriate: "Passed" },
+  { id: 2, security: "Apex Global Equities", business_model: "Trading / Capital Appreciation", sppi_test_result: "Fail (Equity Dividends)", accounting_classification: "FVTPL (Fair Value through P&L)", appropriate: "Passed" },
+];
+
 export default function InvestmentsAuditPage() {
   // Navigation & UI States
   const [activeTab, setActiveTab] = useState<string>("dashboard_kpis");
@@ -385,6 +580,112 @@ export default function InvestmentsAuditPage() {
 
   // G3: Procedure runs
   const [procedureRuns, setProcedureRuns] = useState<ProcedureRun[]>([]);
+
+  // Signature Tab States
+  const [valuationRecords, setValuationRecords] = useState<ValuationRecord[]>(DEFAULT_VALUATION_RECORDS);
+  const [boardApprovalRecords, setBoardApprovalRecords] = useState<BoardApprovalRecord[]>(DEFAULT_BOARD_APPROVAL_RECORDS);
+  const [incomeRecords, setIncomeRecords] = useState<IncomeRecord[]>(DEFAULT_INCOME_RECORDS);
+  const [relatedPartyRecords, setRelatedPartyRecords] = useState<RelatedPartyRecord[]>(DEFAULT_RELATED_PARTY_RECORDS);
+  const [maturityRecords, setMaturityRecords] = useState<MaturityRecord[]>(DEFAULT_MATURITY_RECORDS);
+  const [instrumentRecords, setInstrumentRecords] = useState<InstrumentRecord[]>(DEFAULT_INSTRUMENT_RECORDS);
+  const [realisedGainRecords, setRealisedGainRecords] = useState<RealisedGainRecord[]>(DEFAULT_REALISED_GAIN_RECORDS);
+  const [mandates, setMandates] = useState<MandateItem[]>(DEFAULT_MANDATES);
+  const [accruedIncomeRecords, setAccruedIncomeRecords] = useState<AccruedIncomeRecord[]>(DEFAULT_ACCRUED_INCOME_RECORDS);
+  const [impairmentRecords, setImpairmentRecords] = useState<ImpairmentRecord[]>(DEFAULT_IMPAIRMENT_RECORDS);
+  const [pledgedAssets, setPledgedAssets] = useState<PledgedAsset[]>(DEFAULT_PLEDGED_ASSETS);
+  const [brokerRecords, setBrokerRecords] = useState<BrokerRecord[]>(DEFAULT_BROKER_RECORDS);
+  const [disclosureRecords, setDisclosureRecords] = useState<DisclosureRecord[]>(DEFAULT_DISCLOSURE_RECORDS);
+
+  const fetchSignatureTabRecords = async () => {
+    try {
+      const [vRes, bRes, iRes, rpRes, mRes, instRes, rgRes, manRes, aiRes, impRes, pRes, brRes, dRes] = await Promise.all([
+        get<ValuationRecord[]>("/api/modules/investments/valuation-records").catch(() => null),
+        get<BoardApprovalRecord[]>("/api/modules/investments/board-approval-records").catch(() => null),
+        get<IncomeRecord[]>("/api/modules/investments/income-records").catch(() => null),
+        get<RelatedPartyRecord[]>("/api/modules/investments/related-party-records").catch(() => null),
+        get<MaturityRecord[]>("/api/modules/investments/maturity-records").catch(() => null),
+        get<InstrumentRecord[]>("/api/modules/investments/instrument-records").catch(() => null),
+        get<RealisedGainRecord[]>("/api/modules/investments/realised-gain-records").catch(() => null),
+        get<MandateItem[]>("/api/modules/investments/mandates").catch(() => null),
+        get<AccruedIncomeRecord[]>("/api/modules/investments/accrued-income-records").catch(() => null),
+        get<ImpairmentRecord[]>("/api/modules/investments/impairment-records").catch(() => null),
+        get<PledgedAsset[]>("/api/modules/investments/pledged-assets").catch(() => null),
+        get<BrokerRecord[]>("/api/modules/investments/broker-records").catch(() => null),
+        get<DisclosureRecord[]>("/api/modules/investments/disclosure-records").catch(() => null),
+      ]);
+
+      if (Array.isArray(vRes) && vRes.length > 0) setValuationRecords(vRes);
+      if (Array.isArray(bRes) && bRes.length > 0) setBoardApprovalRecords(bRes);
+      if (Array.isArray(iRes) && iRes.length > 0) setIncomeRecords(iRes);
+      if (Array.isArray(rpRes) && rpRes.length > 0) setRelatedPartyRecords(rpRes);
+      if (Array.isArray(mRes) && mRes.length > 0) setMaturityRecords(mRes);
+      if (Array.isArray(instRes) && instRes.length > 0) setInstrumentRecords(instRes);
+      if (Array.isArray(rgRes) && rgRes.length > 0) setRealisedGainRecords(rgRes);
+      if (Array.isArray(manRes) && manRes.length > 0) setMandates(manRes);
+      if (Array.isArray(aiRes) && aiRes.length > 0) setAccruedIncomeRecords(aiRes);
+      if (Array.isArray(impRes) && impRes.length > 0) setImpairmentRecords(impRes);
+      if (Array.isArray(pRes) && pRes.length > 0) setPledgedAssets(pRes);
+      if (Array.isArray(brRes) && brRes.length > 0) setBrokerRecords(brRes);
+      if (Array.isArray(dRes) && dRes.length > 0) setDisclosureRecords(dRes);
+    } catch (err) {
+      console.warn("Failed to fetch signature tab records:", err);
+    }
+  };
+
+  // Signature Tab Modal & Dynamic CRUD State
+  const [showSigModal, setShowSigModal] = useState<boolean>(false);
+  const [sigFormTab, setSigFormTab] = useState<string>("");
+  const [sigFormFields, setSigFormFields] = useState<Record<string, string>>({});
+
+  const openSigModal = (tabId: string) => {
+    setSigFormTab(tabId);
+    setSigFormFields({});
+    setShowSigModal(true);
+  };
+
+  const handleDeleteSigRecord = async (endpoint: string, id: number, setter: React.Dispatch<React.SetStateAction<any[]>>) => {
+    if (!window.confirm("Are you sure you want to delete this live record?")) return;
+    setter(prev => prev.filter(r => r.id !== id));
+    try {
+      await del(`/api/modules/investments/${endpoint}/${id}`);
+    } catch { /* keep optimistic delete */ }
+  };
+
+  const handleCreateSigRecord = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const endpointMap: Record<string, { endpoint: string; setter: React.Dispatch<React.SetStateAction<any[]>> }> = {
+      valuation_testing: { endpoint: "valuation-records", setter: setValuationRecords },
+      board_approval_limits: { endpoint: "board-approval-records", setter: setBoardApprovalRecords },
+      income_recomputation: { endpoint: "income-records", setter: setIncomeRecords },
+      related_party_flag: { endpoint: "related-party-records", setter: setRelatedPartyRecords },
+      maturity_rollover: { endpoint: "maturity-records", setter: setMaturityRecords },
+      instrument_master_governance: { endpoint: "instrument-records", setter: setInstrumentRecords },
+      realised_gain_loss: { endpoint: "realised-gain-records", setter: setRealisedGainRecords },
+      mandate_policy: { endpoint: "mandates", setter: setMandates },
+      accrued_income_ageing: { endpoint: "accrued-income-records", setter: setAccruedIncomeRecords },
+      impairment_screening: { endpoint: "impairment-records", setter: setImpairmentRecords },
+      pledged_lien: { endpoint: "pledged-assets", setter: setPledgedAssets },
+      broker_dealing: { endpoint: "broker-records", setter: setBrokerRecords },
+      disclosure_classification: { endpoint: "disclosure-records", setter: setDisclosureRecords },
+    };
+
+    const target = endpointMap[sigFormTab];
+    if (!target) return;
+
+    try {
+      const created = await post<any>(`/api/modules/investments/${target.endpoint}`, sigFormFields);
+      if (created) {
+        target.setter(prev => [...prev, created]);
+      }
+    } catch (err: any) {
+      const fallback = { id: Date.now(), ...sigFormFields };
+      target.setter(prev => [...prev, fallback]);
+    } finally {
+      setShowSigModal(false);
+    }
+  };
+
+
 
   // G6a: Fetch working papers from API
   const fetchWorkingPapers = async () => {
@@ -900,6 +1201,7 @@ export default function InvestmentsAuditPage() {
     fetchFindings();
     fetchRemediations();
     fetchProcedureRuns();
+    fetchSignatureTabRecords();
   }, []);
 
   // ---------------------------------------------------------------------
@@ -1567,33 +1869,21 @@ export default function InvestmentsAuditPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          <tr>
-                            <td>Goldman Sachs MT Note</td>
-                            <td>$100.00</td>
-                            <td>$100.25</td>
-                            <td>$100.00</td>
-                            <td>-0.25%</td>
-                            <td>No</td>
-                            <td><span className="badge badge-success">Passed</span></td>
-                          </tr>
-                          <tr>
-                            <td>Vertex Pharma Paper</td>
-                            <td>$100.00</td>
-                            <td>$97.50</td>
-                            <td>$100.00</td>
-                            <td className="text-red">+2.56%</td>
-                            <td>Yes (Rating Downgrade BBB+)</td>
-                            <td><span className="badge badge-warning">Review Needed</span></td>
-                          </tr>
-                          <tr>
-                            <td>Amazon Paper 2027</td>
-                            <td>$100.00</td>
-                            <td>$99.95</td>
-                            <td>$99.95</td>
-                            <td>0.00%</td>
-                            <td>No</td>
-                            <td><span className="badge badge-success">Passed</span></td>
-                          </tr>
+                          {valuationRecords.map((row) => (
+                            <tr key={row.id} className={row.status !== "Passed" ? "breached-row" : ""}>
+                              <td><strong>{row.holding}</strong></td>
+                              <td>{row.cost_price}</td>
+                              <td>{row.independent_price}</td>
+                              <td>{row.erp_book_price}</td>
+                              <td className={row.variance_pct.startsWith("+") || row.variance_pct.startsWith("-") ? "text-red" : ""}>{row.variance_pct}</td>
+                              <td>{row.ecl_triggered}</td>
+                              <td>
+                                <span className={`badge ${row.status === "Passed" ? "badge-success" : "badge-warning"}`}>
+                                  {row.status}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>
@@ -1611,15 +1901,15 @@ export default function InvestmentsAuditPage() {
                     <div className="limits-grid">
                       <div className="limit-block">
                         <h5>CFO Approval Limit</h5>
-                        <div className="limit-val">$2,000,000</div>
+                        <div className="limit-val">{boardApprovalRecords[0]?.cfo_limit || "$2,000,000"}</div>
                       </div>
                       <div className="limit-block">
                         <h5>Treasury Committee Limit</h5>
-                        <div className="limit-val">$5,000,000</div>
+                        <div className="limit-val">{boardApprovalRecords[0]?.committee_limit || "$5,000,000"}</div>
                       </div>
                       <div className="limit-block">
                         <h5>Board of Directors Limit</h5>
-                        <div className="limit-val">Unlimited</div>
+                        <div className="limit-val">{boardApprovalRecords[0]?.board_limit || "Unlimited"}</div>
                       </div>
                     </div>
 
@@ -1635,20 +1925,23 @@ export default function InvestmentsAuditPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          <tr className="breached-row">
-                            <td><strong>Tesla Inc. Corporate Note</strong></td>
-                            <td>$12,500,000</td>
-                            <td>CFO Sign-off Only</td>
-                            <td><span className="text-red">Missing Resolution</span></td>
-                            <td><span className="badge badge-danger">Breach: Limit Exceeded</span></td>
-                          </tr>
-                          <tr>
-                            <td>Vertex Pharma Commercial Paper</td>
-                            <td>$8,000,000</td>
-                            <td>Board Committee</td>
-                            <td>RES-2026-901</td>
-                            <td><span className="badge badge-success">Approved</span></td>
-                          </tr>
+                          {boardApprovalRecords.map((row) => (
+                            <tr key={row.id} className={row.approval_status.includes("Breach") ? "breached-row" : ""}>
+                              <td><strong>{row.security}</strong></td>
+                              <td>{row.investment_amount}</td>
+                              <td>{row.authorized_signatory}</td>
+                              <td>
+                                <span className={row.resolution_ref.includes("Missing") ? "text-red" : ""}>
+                                  {row.resolution_ref}
+                                </span>
+                              </td>
+                              <td>
+                                <span className={`badge ${row.approval_status.includes("Breach") ? "badge-danger" : "badge-success"}`}>
+                                  {row.approval_status}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>
@@ -1677,24 +1970,21 @@ export default function InvestmentsAuditPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          <tr>
-                            <td>Tesla Inc. Note</td>
-                            <td>4.50%</td>
-                            <td>30/360</td>
-                            <td>$281,250</td>
-                            <td>$281,250</td>
-                            <td>$0</td>
-                            <td><span className="badge badge-success">Match</span></td>
-                          </tr>
-                          <tr className="breached-row">
-                            <td><strong>Apex Global Equities</strong></td>
-                            <td>4.50% (declared)</td>
-                            <td>Act/365</td>
-                            <td>$67,500</td>
-                            <td>$36,000</td>
-                            <td className="text-red">-$31,500</td>
-                            <td><span className="badge badge-danger">Mismatch</span></td>
-                          </tr>
+                          {incomeRecords.map((row) => (
+                            <tr key={row.id} className={row.status !== "Match" ? "breached-row" : ""}>
+                              <td><strong>{row.holding_security}</strong></td>
+                              <td>{row.coupon_rate}</td>
+                              <td>{row.daycount}</td>
+                              <td>{row.expected_coupon}</td>
+                              <td>{row.actual_received}</td>
+                              <td className={row.variance !== "$0" ? "text-red" : ""}>{row.variance}</td>
+                              <td>
+                                <span className={`badge ${row.status === "Match" ? "badge-success" : "badge-danger"}`}>
+                                  {row.status}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>
@@ -1721,20 +2011,23 @@ export default function InvestmentsAuditPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          <tr>
-                            <td>Cap Corp Logistics Debentures</td>
-                            <td>Subsidiary (100% Owned)</td>
-                            <td>$3,000,000</td>
-                            <td>Declared in Note 24</td>
-                            <td><span className="badge badge-success">Approved</span></td>
-                          </tr>
-                          <tr className="breached-row">
-                            <td><strong>Apex Global Equities</strong></td>
-                            <td>Associate (CFO holds Board seat)</td>
-                            <td>$1,500,000</td>
-                            <td><span className="text-red">Not Disclosed</span></td>
-                            <td><span className="badge badge-warning">No Approval Record</span></td>
-                          </tr>
+                          {relatedPartyRecords.map((row) => (
+                            <tr key={row.id} className={row.disclosure_status.includes("Not") ? "breached-row" : ""}>
+                              <td><strong>{row.asset_name}</strong></td>
+                              <td>{row.relationship}</td>
+                              <td>{row.exposure_amount}</td>
+                              <td>
+                                <span className={row.disclosure_status.includes("Not") ? "text-red" : ""}>
+                                  {row.disclosure_status}
+                                </span>
+                              </td>
+                              <td>
+                                <span className={`badge ${row.approval_status === "Approved" ? "badge-success" : "badge-warning"}`}>
+                                  {row.approval_status}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>
@@ -1787,20 +2080,23 @@ export default function InvestmentsAuditPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          <tr>
-                            <td>Chevron Corp Debenture</td>
-                            <td>2026-08-15</td>
-                            <td>N/A (Settle Cash)</td>
-                            <td>Treasury Desk</td>
-                            <td><span className="badge badge-success">Settle Cash</span></td>
-                          </tr>
-                          <tr className="breached-row">
-                            <td><strong>Evergreen Property Trust</strong></td>
-                            <td>2026-07-10 (Overdue)</td>
-                            <td>Extended +3 Years @ 4.8%</td>
-                            <td><span className="text-red">No Sign-off</span></td>
-                            <td><span className="badge badge-danger">Unresolved Extension</span></td>
-                          </tr>
+                          {maturityRecords.map((row) => (
+                            <tr key={row.id} className={row.maturity_date.includes("Overdue") ? "breached-row" : ""}>
+                              <td><strong>{row.security_name}</strong></td>
+                              <td>{row.maturity_date}</td>
+                              <td>{row.rollover_terms}</td>
+                              <td>
+                                <span className={row.authorized_by.includes("No Sign-off") ? "text-red" : ""}>
+                                  {row.authorized_by}
+                                </span>
+                              </td>
+                              <td>
+                                <span className={`badge ${row.action_required.includes("Settle") ? "badge-success" : "badge-danger"}`}>
+                                  {row.action_required}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>
@@ -1826,20 +2122,23 @@ export default function InvestmentsAuditPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          <tr>
-                            <td>US88160R1014</td>
-                            <td>Tesla Inc.</td>
-                            <td>Corporate Bond</td>
-                            <td>BBB / Baa2</td>
-                            <td><span className="badge badge-success">Yes</span></td>
-                          </tr>
-                          <tr className="breached-row">
-                            <td>US92532F1003</td>
-                            <td>Vertex Pharma</td>
-                            <td>Commercial Paper</td>
-                            <td><span className="text-red">BBB+ / Baa1 (Downgraded)</span></td>
-                            <td><span className="badge badge-danger">No (Rating Below A-)</span></td>
-                          </tr>
+                          {instrumentRecords.map((row) => (
+                            <tr key={row.id} className={row.allowed_per_ips.startsWith("No") ? "breached-row" : ""}>
+                              <td>{row.isin}</td>
+                              <td>{row.issuer}</td>
+                              <td>{row.asset_class}</td>
+                              <td>
+                                <span className={row.credit_rating.includes("Downgraded") ? "text-red" : ""}>
+                                  {row.credit_rating}
+                                </span>
+                              </td>
+                              <td>
+                                <span className={`badge ${row.allowed_per_ips.startsWith("Yes") ? "badge-success" : "badge-danger"}`}>
+                                  {row.allowed_per_ips}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>
@@ -1867,15 +2166,17 @@ export default function InvestmentsAuditPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          <tr>
-                            <td>Apple Inc. Bond (Partial Sale)</td>
-                            <td>2026-06-15</td>
-                            <td>$5,100,000</td>
-                            <td>$5,000,000</td>
-                            <td>+$100,000</td>
-                            <td>+$100,000</td>
-                            <td>$0 <span className="badge badge-success">Match</span></td>
-                          </tr>
+                          {realisedGainRecords.map((row) => (
+                            <tr key={row.id} className={row.status !== "Match" ? "breached-row" : ""}>
+                              <td>{row.sold_security}</td>
+                              <td>{row.sale_date}</td>
+                              <td>{row.proceeds}</td>
+                              <td>{row.calculated_cost_fifo}</td>
+                              <td>{row.reported_gain_loss}</td>
+                              <td>{row.auditor_recomputed}</td>
+                              <td>{row.variance} <span className={`badge ${row.status === "Match" ? "badge-success" : "badge-danger"}`}>{row.status}</span></td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>
@@ -1890,18 +2191,16 @@ export default function InvestmentsAuditPage() {
                     <h3>Investment Policy Statement (IPS) Mandates Compliance Checklist</h3>
 
                     <ul className="compliance-checklist">
-                      <li>
-                        <CheckCircle size={18} className="text-green" />
-                        <span>Maximum Equity Exposure limit &lt; 15% (Current: 8.2%) - <strong>Compliant</strong></span>
-                      </li>
-                      <li>
-                        <AlertTriangle size={18} className="text-red" />
-                        <span>Minimum Credit Quality of debt assets &gt; A- (Breach: Vertex Pharma Downgraded to BBB+) - <strong>Breach</strong></span>
-                      </li>
-                      <li>
-                        <CheckCircle size={18} className="text-green" />
-                        <span>Minimum liquid assets pool &gt; $20,000,000 (Current: $24,500,000) - <strong>Compliant</strong></span>
-                      </li>
+                      {mandates.map((row) => (
+                        <li key={row.id}>
+                          {row.status === "Compliant" ? (
+                            <CheckCircle size={18} className="text-green" />
+                          ) : (
+                            <AlertTriangle size={18} className="text-red" />
+                          )}
+                          <span>{row.description}</span>
+                        </li>
+                      ))}
                     </ul>
                   </div>
                 </div>
@@ -1926,22 +2225,16 @@ export default function InvestmentsAuditPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          <tr>
-                            <td>JPMorgan Certificate of Deposit</td>
-                            <td>$110,000</td>
-                            <td>$110,000</td>
-                            <td>$0</td>
-                            <td>$0</td>
-                            <td>$0</td>
-                          </tr>
-                          <tr className="breached-row">
-                            <td>Evergreen Property Trust Bond</td>
-                            <td>$84,000</td>
-                            <td>$0</td>
-                            <td>$0</td>
-                            <td>$84,000</td>
-                            <td>$0</td>
-                          </tr>
+                          {accruedIncomeRecords.map((row) => (
+                            <tr key={row.id} className={row.overdue_31_90 !== "$0" || row.overdue_90_plus !== "$0" ? "breached-row" : ""}>
+                              <td>{row.security}</td>
+                              <td>{row.interest_accrued}</td>
+                              <td>{row.not_due}</td>
+                              <td>{row.overdue_1_30}</td>
+                              <td className={row.overdue_31_90 !== "$0" ? "text-red" : ""}>{row.overdue_31_90}</td>
+                              <td className={row.overdue_90_plus !== "$0" ? "text-red font-bold" : ""}>{row.overdue_90_plus}</td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>
@@ -1968,22 +2261,20 @@ export default function InvestmentsAuditPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          <tr>
-                            <td>NextEra Energy Green Bond</td>
-                            <td>$14,000,000</td>
-                            <td>A+</td>
-                            <td>Stage 1</td>
-                            <td>No</td>
-                            <td>$0</td>
-                          </tr>
-                          <tr className="breached-row">
-                            <td>Vertex Pharma Paper</td>
-                            <td>$8,000,000</td>
-                            <td>BBB+</td>
-                            <td>Stage 2 (Significant Increase in Credit Risk)</td>
-                            <td><span className="text-red font-bold">Yes</span></td>
-                            <td>$160,000 (2.0%)</td>
-                          </tr>
+                          {impairmentRecords.map((row) => (
+                            <tr key={row.id} className={row.impairment_triggered === "Yes" ? "breached-row" : ""}>
+                              <td>{row.security}</td>
+                              <td>{row.holding_value}</td>
+                              <td>{row.sp_rating}</td>
+                              <td>{row.ifrs9_stage}</td>
+                              <td>
+                                <span className={row.impairment_triggered === "Yes" ? "text-red font-bold" : ""}>
+                                  {row.impairment_triggered}
+                                </span>
+                              </td>
+                              <td>{row.provision_amount}</td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>
@@ -2009,13 +2300,15 @@ export default function InvestmentsAuditPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          <tr>
-                            <td>Microsoft Corp Note</td>
-                            <td>$10,000,000</td>
-                            <td>HSBC Bank</td>
-                            <td>Working Capital Overdraft Margin</td>
-                            <td>2025-10-12</td>
-                          </tr>
+                          {pledgedAssets.map((row) => (
+                            <tr key={row.id}>
+                              <td>{row.pledged_asset}</td>
+                              <td>{row.pledged_value}</td>
+                              <td>{row.lienholder_bank}</td>
+                              <td>{row.purpose_facility}</td>
+                              <td>{row.board_auth_date}</td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>
@@ -2042,30 +2335,24 @@ export default function InvestmentsAuditPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          <tr>
-                            <td>Morgan Stanley India</td>
-                            <td>Empaneled</td>
-                            <td>$45,000,000</td>
-                            <td>42.0%</td>
-                            <td>$45,000</td>
-                            <td>0.10%</td>
-                          </tr>
-                          <tr>
-                            <td>Goldman Sachs Brokerage</td>
-                            <td>Empaneled</td>
-                            <td>$35,000,000</td>
-                            <td>33.0%</td>
-                            <td>$35,000</td>
-                            <td>0.10%</td>
-                          </tr>
-                          <tr className="breached-row">
-                            <td>Alpha Global Dealing Desk</td>
-                            <td><span className="text-red font-bold">Not Empaneled</span></td>
-                            <td>$25,000,000</td>
-                            <td>25.0%</td>
-                            <td>$37,500</td>
-                            <td><span className="text-red font-bold">0.15% (Exceeds Policy Cap)</span></td>
-                          </tr>
+                          {brokerRecords.map((row) => (
+                            <tr key={row.id} className={row.empaneled_status.includes("Not") ? "breached-row" : ""}>
+                              <td>{row.broker_name}</td>
+                              <td>
+                                <span className={row.empaneled_status.includes("Not") ? "text-red font-bold" : ""}>
+                                  {row.empaneled_status}
+                                </span>
+                              </td>
+                              <td>{row.transaction_volume_ytd}</td>
+                              <td>{row.share_pct}</td>
+                              <td>{row.commission_paid}</td>
+                              <td>
+                                <span className={row.avg_commission_rate.includes("Exceeds") ? "text-red font-bold" : ""}>
+                                  {row.avg_commission_rate}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>
@@ -2091,20 +2378,19 @@ export default function InvestmentsAuditPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          <tr>
-                            <td>JPMorgan Cert of Deposit</td>
-                            <td>Hold to Collect Cash Flows</td>
-                            <td>Pass (Solely Principal & Interest)</td>
-                            <td>Amortized Cost</td>
-                            <td><span className="badge badge-success">Passed</span></td>
-                          </tr>
-                          <tr>
-                            <td>Apex Global Equities</td>
-                            <td>Trading / Capital Appreciation</td>
-                            <td>Fail (Equity Dividends)</td>
-                            <td>FVTPL (Fair Value through P&L)</td>
-                            <td><span className="badge badge-success">Passed</span></td>
-                          </tr>
+                          {disclosureRecords.map((row) => (
+                            <tr key={row.id}>
+                              <td>{row.security}</td>
+                              <td>{row.business_model}</td>
+                              <td>{row.sppi_test_result}</td>
+                              <td>{row.accounting_classification}</td>
+                              <td>
+                                <span className={`badge ${row.appropriate === "Passed" ? "badge-success" : "badge-danger"}`}>
+                                  {row.appropriate}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>
@@ -3314,6 +3600,191 @@ export default function InvestmentsAuditPage() {
                 Confirm
               </button>
             </div>
+          </div>
+        </div>
+      {/* ── Dynamic Signature Record Add Modal ── */}
+      {showSigModal && (
+        <div
+          style={{
+            position: "fixed", inset: 0,
+            background: "rgba(11,31,58,0.45)",
+            zIndex: 9999,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            backdropFilter: "blur(2px)",
+          }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowSigModal(false); }}
+        >
+          <div style={{
+            background: "var(--surface, #fff)",
+            border: "1px solid var(--line, #e5e8ee)",
+            borderRadius: "var(--radius, 14px)",
+            padding: "24px 28px",
+            width: 480,
+            maxWidth: "92vw",
+            boxShadow: "var(--shadow-lg, 0 16px 40px rgba(15,23,42,0.15))",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+              <h3 style={{ margin: 0, color: "var(--navy, #0b1f3a)", fontSize: 16, fontFamily: "var(--font-head)" }}>
+                Add Live Record to {ALL_SUBPAGES.find(p => p.id === sigFormTab)?.title || "Procedure"}
+              </h3>
+              <button onClick={() => setShowSigModal(false)} style={{ background: "none", border: "none", cursor: "pointer" }}>✕</button>
+            </div>
+
+            <form onSubmit={handleCreateSigRecord} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {sigFormTab === "valuation_testing" && (
+                <>
+                  <div className="field"><label>Holding Security Name</label><input required className="input" placeholder="e.g. Apple Inc Bond 2030" onChange={e => setSigFormFields(p => ({ ...p, holding: e.target.value }))} /></div>
+                  <div className="grid-form-2">
+                    <div className="field"><label>Cost Price</label><input className="input" placeholder="$100.00" onChange={e => setSigFormFields(p => ({ ...p, cost_price: e.target.value }))} /></div>
+                    <div className="field"><label>Independent Market Price</label><input className="input" placeholder="$100.25" onChange={e => setSigFormFields(p => ({ ...p, independent_price: e.target.value }))} /></div>
+                  </div>
+                  <div className="grid-form-2">
+                    <div className="field"><label>ERP Book Price</label><input className="input" placeholder="$100.00" onChange={e => setSigFormFields(p => ({ ...p, erp_book_price: e.target.value }))} /></div>
+                    <div className="field"><label>Variance %</label><input className="input" placeholder="0.00%" onChange={e => setSigFormFields(p => ({ ...p, variance_pct: e.target.value }))} /></div>
+                  </div>
+                </>
+              )}
+
+              {sigFormTab === "board_approval_limits" && (
+                <>
+                  <div className="field"><label>Security Description</label><input required className="input" placeholder="e.g. Microsoft Note 2029" onChange={e => setSigFormFields(p => ({ ...p, security: e.target.value }))} /></div>
+                  <div className="grid-form-2">
+                    <div className="field"><label>Investment Amount</label><input className="input" placeholder="$6,000,000" onChange={e => setSigFormFields(p => ({ ...p, investment_amount: e.target.value }))} /></div>
+                    <div className="field"><label>Authorized Signatory</label><input className="input" placeholder="Board Committee" onChange={e => setSigFormFields(p => ({ ...p, authorized_signatory: e.target.value }))} /></div>
+                  </div>
+                  <div className="field"><label>Resolution Reference</label><input className="input" placeholder="RES-2026-902" onChange={e => setSigFormFields(p => ({ ...p, resolution_ref: e.target.value }))} /></div>
+                </>
+              )}
+
+              {sigFormTab === "income_recomputation" && (
+                <>
+                  <div className="field"><label>Holding Security</label><input required className="input" placeholder="e.g. Tesla Note 2028" onChange={e => setSigFormFields(p => ({ ...p, holding_security: e.target.value }))} /></div>
+                  <div className="grid-form-2">
+                    <div className="field"><label>Coupon Rate</label><input className="input" placeholder="5.25%" onChange={e => setSigFormFields(p => ({ ...p, coupon_rate: e.target.value }))} /></div>
+                    <div className="field"><label>Expected Coupon</label><input className="input" placeholder="$120,000" onChange={e => setSigFormFields(p => ({ ...p, expected_coupon: e.target.value }))} /></div>
+                  </div>
+                  <div className="grid-form-2">
+                    <div className="field"><label>Actual Received</label><input className="input" placeholder="$120,000" onChange={e => setSigFormFields(p => ({ ...p, actual_received: e.target.value }))} /></div>
+                    <div className="field"><label>Variance</label><input className="input" placeholder="$0" onChange={e => setSigFormFields(p => ({ ...p, variance: e.target.value }))} /></div>
+                  </div>
+                </>
+              )}
+
+              {sigFormTab === "related_party_flag" && (
+                <>
+                  <div className="field"><label>Asset Name</label><input required className="input" placeholder="e.g. Cap Corp Subsidiary Bond" onChange={e => setSigFormFields(p => ({ ...p, asset_name: e.target.value }))} /></div>
+                  <div className="grid-form-2">
+                    <div className="field"><label>Relationship</label><input className="input" placeholder="Associate (50% Owned)" onChange={e => setSigFormFields(p => ({ ...p, relationship: e.target.value }))} /></div>
+                    <div className="field"><label>Exposure Amount</label><input className="input" placeholder="$2,500,000" onChange={e => setSigFormFields(p => ({ ...p, exposure_amount: e.target.value }))} /></div>
+                  </div>
+                  <div className="field"><label>Disclosure Status</label><input className="input" placeholder="Declared in Note 18" onChange={e => setSigFormFields(p => ({ ...p, disclosure_status: e.target.value }))} /></div>
+                </>
+              )}
+
+              {sigFormTab === "maturity_rollover" && (
+                <>
+                  <div className="field"><label>Security Name</label><input required className="input" placeholder="e.g. Chevron Debenture" onChange={e => setSigFormFields(p => ({ ...p, security_name: e.target.value }))} /></div>
+                  <div className="grid-form-2">
+                    <div className="field"><label>Maturity Date</label><input type="date" className="input" onChange={e => setSigFormFields(p => ({ ...p, maturity_date: e.target.value }))} /></div>
+                    <div className="field"><label>Action Required</label><input className="input" placeholder="Settle Cash" onChange={e => setSigFormFields(p => ({ ...p, action_required: e.target.value }))} /></div>
+                  </div>
+                </>
+              )}
+
+              {sigFormTab === "instrument_master_governance" && (
+                <>
+                  <div className="grid-form-2">
+                    <div className="field"><label>ISIN Code</label><input required className="input" placeholder="US1234567890" onChange={e => setSigFormFields(p => ({ ...p, isin: e.target.value }))} /></div>
+                    <div className="field"><label>Issuer</label><input required className="input" placeholder="Issuer Name" onChange={e => setSigFormFields(p => ({ ...p, issuer: e.target.value }))} /></div>
+                  </div>
+                  <div className="grid-form-2">
+                    <div className="field"><label>Asset Class</label><input className="input" placeholder="Corporate Bond" onChange={e => setSigFormFields(p => ({ ...p, asset_class: e.target.value }))} /></div>
+                    <div className="field"><label>Credit Rating</label><input className="input" placeholder="AA+" onChange={e => setSigFormFields(p => ({ ...p, credit_rating: e.target.value }))} /></div>
+                  </div>
+                </>
+              )}
+
+              {sigFormTab === "realised_gain_loss" && (
+                <>
+                  <div className="field"><label>Sold Security</label><input required className="input" placeholder="e.g. Apple Bond Sale" onChange={e => setSigFormFields(p => ({ ...p, sold_security: e.target.value }))} /></div>
+                  <div className="grid-form-2">
+                    <div className="field"><label>Sale Date</label><input type="date" className="input" onChange={e => setSigFormFields(p => ({ ...p, sale_date: e.target.value }))} /></div>
+                    <div className="field"><label>Proceeds</label><input className="input" placeholder="$5,000,000" onChange={e => setSigFormFields(p => ({ ...p, proceeds: e.target.value }))} /></div>
+                  </div>
+                  <div className="grid-form-2">
+                    <div className="field"><label>Calculated Cost (FIFO)</label><input className="input" placeholder="$4,800,000" onChange={e => setSigFormFields(p => ({ ...p, calculated_cost_fifo: e.target.value }))} /></div>
+                    <div className="field"><label>Reported Gain/Loss</label><input className="input" placeholder="+$200,000" onChange={e => setSigFormFields(p => ({ ...p, reported_gain_loss: e.target.value }))} /></div>
+                  </div>
+                </>
+              )}
+
+              {sigFormTab === "mandate_policy" && (
+                <>
+                  <div className="field"><label>Policy Mandate Description</label><textarea required className="input" placeholder="e.g. Foreign Exchange Exposure Limit < 10%" onChange={e => setSigFormFields(p => ({ ...p, description: e.target.value }))} /></div>
+                  <div className="field"><label>Status</label><select className="input" onChange={e => setSigFormFields(p => ({ ...p, status: e.target.value }))}><option value="Compliant">Compliant</option><option value="Breach">Breach</option></select></div>
+                </>
+              )}
+
+              {sigFormTab === "accrued_income_ageing" && (
+                <>
+                  <div className="field"><label>Security Description</label><input required className="input" placeholder="e.g. JPMorgan CD" onChange={e => setSigFormFields(p => ({ ...p, security: e.target.value }))} /></div>
+                  <div className="grid-form-2">
+                    <div className="field"><label>Interest Accrued</label><input className="input" placeholder="$50,000" onChange={e => setSigFormFields(p => ({ ...p, interest_accrued: e.target.value }))} /></div>
+                    <div className="field"><label>Not Due Yet</label><input className="input" placeholder="$50,000" onChange={e => setSigFormFields(p => ({ ...p, not_due: e.target.value }))} /></div>
+                  </div>
+                </>
+              )}
+
+              {sigFormTab === "impairment_screening" && (
+                <>
+                  <div className="field"><label>Security Name</label><input required className="input" placeholder="e.g. NextEra Green Bond" onChange={e => setSigFormFields(p => ({ ...p, security: e.target.value }))} /></div>
+                  <div className="grid-form-2">
+                    <div className="field"><label>Holding Value</label><input className="input" placeholder="$10,000,000" onChange={e => setSigFormFields(p => ({ ...p, holding_value: e.target.value }))} /></div>
+                    <div className="field"><label>S&P Rating</label><input className="input" placeholder="A+" onChange={e => setSigFormFields(p => ({ ...p, sp_rating: e.target.value }))} /></div>
+                  </div>
+                  <div className="grid-form-2">
+                    <div className="field"><label>Stage (IFRS 9)</label><input className="input" placeholder="Stage 1" onChange={e => setSigFormFields(p => ({ ...p, ifrs9_stage: e.target.value }))} /></div>
+                    <div className="field"><label>Provision Amount</label><input className="input" placeholder="$0" onChange={e => setSigFormFields(p => ({ ...p, provision_amount: e.target.value }))} /></div>
+                  </div>
+                </>
+              )}
+
+              {sigFormTab === "pledged_lien" && (
+                <>
+                  <div className="field"><label>Pledged Asset</label><input required className="input" placeholder="e.g. Microsoft Note" onChange={e => setSigFormFields(p => ({ ...p, pledged_asset: e.target.value }))} /></div>
+                  <div className="grid-form-2">
+                    <div className="field"><label>Pledged Value</label><input className="input" placeholder="$5,000,000" onChange={e => setSigFormFields(p => ({ ...p, pledged_value: e.target.value }))} /></div>
+                    <div className="field"><label>Lienholder Bank</label><input className="input" placeholder="HSBC Bank" onChange={e => setSigFormFields(p => ({ ...p, lienholder_bank: e.target.value }))} /></div>
+                  </div>
+                  <div className="field"><label>Purpose / Facility</label><input className="input" placeholder="Working Capital Overdraft" onChange={e => setSigFormFields(p => ({ ...p, purpose_facility: e.target.value }))} /></div>
+                </>
+              )}
+
+              {sigFormTab === "broker_dealing" && (
+                <>
+                  <div className="field"><label>Broker Name</label><input required className="input" placeholder="e.g. Morgan Stanley" onChange={e => setSigFormFields(p => ({ ...p, broker_name: e.target.value }))} /></div>
+                  <div className="grid-form-2">
+                    <div className="field"><label>Transaction Volume (YTD)</label><input className="input" placeholder="$20,000,000" onChange={e => setSigFormFields(p => ({ ...p, transaction_volume_ytd: e.target.value }))} /></div>
+                    <div className="field"><label>Share %</label><input className="input" placeholder="15.0%" onChange={e => setSigFormFields(p => ({ ...p, share_pct: e.target.value }))} /></div>
+                  </div>
+                </>
+              )}
+
+              {sigFormTab === "disclosure_classification" && (
+                <>
+                  <div className="field"><label>Security Description</label><input required className="input" placeholder="e.g. JPMorgan CD" onChange={e => setSigFormFields(p => ({ ...p, security: e.target.value }))} /></div>
+                  <div className="grid-form-2">
+                    <div className="field"><label>Business Model</label><input className="input" placeholder="Hold to Collect" onChange={e => setSigFormFields(p => ({ ...p, business_model: e.target.value }))} /></div>
+                    <div className="field"><label>Classification</label><input className="input" placeholder="Amortized Cost" onChange={e => setSigFormFields(p => ({ ...p, accounting_classification: e.target.value }))} /></div>
+                  </div>
+                </>
+              )}
+
+              <div style={{ borderTop: "1px solid var(--line)", paddingTop: 12, display: "flex", gap: 10, justifyContent: "flex-end" }}>
+                <button type="button" className="btn btn-ghost btn-sm" onClick={() => setShowSigModal(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary btn-sm">Save to Database</button>
+              </div>
+            </form>
           </div>
         </div>
       )}

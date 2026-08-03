@@ -347,3 +347,186 @@ class EvidenceApprovePayload(BaseModel):
 class EvidenceRejectPayload(BaseModel):
     """Payload for rejecting a working-paper / evidence document. revision_notes is mandatory."""
     revision_notes: str = Field(..., min_length=5, description="Mandatory notes explaining what must be revised.")
+
+
+# ---------------------------------------------------------------------------
+# Signature Tab Schemas
+# ---------------------------------------------------------------------------
+
+class ValuationRecordOut(BaseModel):
+    id: int
+    holding: str
+    cost_price: str
+    independent_price: str
+    erp_book_price: str
+    variance_pct: str
+    ecl_triggered: str
+    status: str
+    tenant_id: int
+    created_at: datetime
+    updated_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
+class BoardApprovalRecordOut(BaseModel):
+    id: int
+    security: str
+    investment_amount: str
+    authorized_signatory: str
+    resolution_ref: str
+    approval_status: str
+    cfo_limit: str
+    committee_limit: str
+    board_limit: str
+    tenant_id: int
+    created_at: datetime
+    updated_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
+class IncomeRecordOut(BaseModel):
+    id: int
+    holding_security: str
+    coupon_rate: str
+    daycount: str
+    expected_coupon: str
+    actual_received: str
+    variance: str
+    status: str
+    tenant_id: int
+    created_at: datetime
+    updated_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
+class RelatedPartyRecordOut(BaseModel):
+    id: int
+    asset_name: str
+    relationship: str
+    exposure_amount: str
+    disclosure_status: str
+    approval_status: str
+    tenant_id: int
+    created_at: datetime
+    updated_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
+class MaturityRecordOut(BaseModel):
+    id: int
+    security_name: str
+    maturity_date: str
+    rollover_terms: str
+    authorized_by: str
+    action_required: str
+    tenant_id: int
+    created_at: datetime
+    updated_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
+class InstrumentRecordOut(BaseModel):
+    id: int
+    isin: str
+    issuer: str
+    asset_class: str
+    credit_rating: str
+    allowed_per_ips: str
+    tenant_id: int
+    created_at: datetime
+    updated_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
+class RealisedGainRecordOut(BaseModel):
+    id: int
+    sold_security: str
+    sale_date: str
+    proceeds: str
+    calculated_cost_fifo: str
+    reported_gain_loss: str
+    auditor_recomputed: str
+    variance: str
+    status: str
+    tenant_id: int
+    created_at: datetime
+    updated_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
+class MandateItemOut(BaseModel):
+    id: int
+    description: str
+    status: str
+    tenant_id: int
+    created_at: datetime
+    updated_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
+class AccruedIncomeRecordOut(BaseModel):
+    id: int
+    security: str
+    interest_accrued: str
+    not_due: str
+    overdue_1_30: str
+    overdue_31_90: str
+    overdue_90_plus: str
+    tenant_id: int
+    created_at: datetime
+    updated_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ImpairmentRecordOut(BaseModel):
+    id: int
+    security: str
+    holding_value: str
+    sp_rating: str
+    ifrs9_stage: str
+    impairment_triggered: str
+    provision_amount: str
+    tenant_id: int
+    created_at: datetime
+    updated_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PledgedAssetOut(BaseModel):
+    id: int
+    pledged_asset: str
+    pledged_value: str
+    lienholder_bank: str
+    purpose_facility: str
+    board_auth_date: str
+    tenant_id: int
+    created_at: datetime
+    updated_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
+class BrokerRecordOut(BaseModel):
+    id: int
+    broker_name: str
+    empaneled_status: str
+    transaction_volume_ytd: str
+    share_pct: str
+    commission_paid: str
+    avg_commission_rate: str
+    tenant_id: int
+    created_at: datetime
+    updated_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
+class DisclosureRecordOut(BaseModel):
+    id: int
+    security: str
+    business_model: str
+    sppi_test_result: str
+    accounting_classification: str
+    appropriate: str
+    tenant_id: int
+    created_at: datetime
+    updated_at: datetime
+    model_config = ConfigDict(from_attributes=True)
