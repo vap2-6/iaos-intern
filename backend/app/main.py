@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 import app.models  # noqa: F401  — registers platform tables on Base.metadata
-from app.api import admin, auth, modules
+from app.api import admin, auth, modules, v1_dynamic
 from app.bootstrap import create_all_tables, ensure_super_admin
 from app.core.config import settings
 from app.module_loader import load_modules
@@ -41,6 +41,8 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(admin.router)
 app.include_router(modules.router)
+app.include_router(v1_dynamic.router)
+
 
 
 @app.get("/api/health", tags=["system"])
