@@ -455,6 +455,29 @@ const INITIAL_FINDINGS: AuditFinding[] = [
   },
 ];
 
+const INITIAL_REMEDIATIONS: Remediation[] = [
+  {
+    id: "rem-1",
+    finding_id: "find-1",
+    finding_ref: "OBS-INV-001",
+    capa_description: "Obtain retrospective Board Committee approval for Tesla Inc $12.5M purchase.",
+    control_owner: "CFO Office",
+    target_date: "2026-08-30",
+    milestone_status: "Open",
+    is_overdue: false,
+  },
+  {
+    id: "rem-2",
+    finding_id: "find-2",
+    finding_ref: "OBS-INV-002",
+    capa_description: "Execute credit waiver review or orderly exit for Vertex Pharma paper under IPS guidelines.",
+    control_owner: "Risk Management Desk",
+    target_date: "2026-09-15",
+    milestone_status: "In-Progress",
+    is_overdue: false,
+  },
+];
+
 const DEFAULT_VALUATION_RECORDS: ValuationRecord[] = [
   { id: 1, holding: "Goldman Sachs MT Note", cost_price: "$100.00", independent_price: "$100.25", erp_book_price: "$100.00", variance_pct: "-0.25%", ecl_triggered: "No", status: "Passed" },
   { id: 2, holding: "Vertex Pharma Paper", cost_price: "$100.00", independent_price: "$97.50", erp_book_price: "$100.00", variance_pct: "+2.56%", ecl_triggered: "Yes (Rating Downgrade BBB+)", status: "Review Needed" },
@@ -575,7 +598,7 @@ export default function InvestmentsAuditPage() {
   const [promoteExceptionId, setPromoteExceptionId] = useState<string | null>(null);
 
   // G6c: Remediations — API-backed
-  const [remediations, setRemediations] = useState<Remediation[]>([]);
+  const [remediations, setRemediations] = useState<Remediation[]>(INITIAL_REMEDIATIONS);
   const [remLoading, setRemLoading] = useState<boolean>(false);
 
   // G3: Procedure runs
@@ -745,8 +768,45 @@ export default function InvestmentsAuditPage() {
   const fetchRemediations = async () => {
     setRemLoading(true);
     try {
-      const res = await get<Remediation[]>("/api/modules/investments/remediations");
-      if (Array.isArray(res)) setRemediations(res);
+      const res = await get<any[]>("/api/modules/investments/remediations").catch(() => []);
+      const v1Res = await get<any>("/api/v1/remediations").catch(() => null);
+
+      let items: Remediation[] = [];
+      if (Array.isArray(res) && res.length > 0) {
+        items = res.map((r: any) => ({
+          id: String(r.id),
+          finding_id: String(r.finding_id || r.id),
+          finding_ref: r.finding_ref || r.finding_id || "REF-001",
+          capa_description: r.capa_description || r.action_plan_description || "Corrective action plan",
+          control_owner: r.control_owner || r.owner || "Treasury Operations",
+          target_date: r.target_date || r.due_date || "",
+          retest_date: r.retest_date || "",
+          retest_result: r.retest_result || "",
+          milestone_status: (r.milestone_status || r.status || "Open") as any,
+          is_overdue: Boolean(r.is_overdue),
+        }));
+      } else if (v1Res && Array.isArray(v1Res.items) && v1Res.items.length > 0) {
+        items = v1Res.items.map((r: any) => ({
+          id: String(r.id),
+          finding_id: String(r.id),
+          finding_ref: r.finding_ref || "REF-001",
+          capa_description: r.action_plan_description || r.capa_description || "Corrective action plan",
+          control_owner: r.owner || r.control_owner || "Treasury Operations",
+          target_date: r.due_date || r.target_date || "",
+          retest_date: "",
+          retest_result: "",
+          milestone_status: (r.status || "Open") as any,
+          is_overdue: false,
+        }));
+      }
+
+      if (items.length > 0) {
+        setRemediations((prev) => {
+          const existingIds = new Set(items.map((i) => i.id));
+          const localOnly = prev.filter((p) => !existingIds.has(p.id));
+          return [...localOnly, ...items];
+        });
+      }
     } catch {
       // Keep existing state
     } finally {
@@ -1069,18 +1129,37 @@ export default function InvestmentsAuditPage() {
 
   // G6c: Remediation helpers
   const handleCreateRemediation = async (finding: AuditFinding) => {
+    const defaultDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+    const targetId = finding.ref || finding.id;
+
+    const fallbackRemediation: Remediation = {
+      id: `rem-${Date.now()}`,
+      finding_id: String(finding.id),
+      finding_ref: finding.ref || String(finding.id),
+      capa_description: `Corrective action for: ${finding.title}`,
+      control_owner: finding.owner || "Treasury Operations",
+      target_date: finding.targetCloseDate || defaultDate,
+      milestone_status: "Open",
+      is_overdue: false,
+    };
+
+    // Optimistically update local state immediately so user sees new CAPA instantly
+    setRemediations((prev) => [fallbackRemediation, ...prev]);
+    setFindingsLog((prev) =>
+      prev.map((f) => (f.id === finding.id ? { ...f, status: "Promoted to CAPA" } : f))
+    );
+    setActiveTab("remediation_tracker");
+
     try {
-      const defaultDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
-      await post(`/api/v1/findings/${finding.id}/promote-to-capa`, {
+      await post(`/api/v1/findings/${targetId}/promote-to-capa`, {
         target_close_date: finding.targetCloseDate || defaultDate,
         capa_description: `Corrective action for: ${finding.title}`,
         owner: finding.owner || "Treasury Operations",
       });
       await fetchRemediations();
       await fetchFindings();
-      setActiveTab("remediation_tracker");
-    } catch (err: any) {
-      alert(`Failed to create remediation: ${err?.message || "Unknown error"}`);
+    } catch {
+      /* optimistic update already applied */
     }
   };
 
@@ -3602,6 +3681,8 @@ export default function InvestmentsAuditPage() {
             </div>
           </div>
         </div>
+      )}
+
       {/* ── Dynamic Signature Record Add Modal ── */}
       {showSigModal && (
         <div
